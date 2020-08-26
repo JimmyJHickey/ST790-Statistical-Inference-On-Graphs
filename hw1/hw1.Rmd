@@ -265,6 +265,28 @@ Let $X_1, X_2, \dots, X_n$ be i.i.d random variables. The sample variance of the
 $$s^2 = \frac{2}{n(n-1)} \sum_{i < j} \frac{1}{2} (X_i - X_j)^2.$$
 Suppose now the $X_i$ are i.i.d Bernoulli random variables with probability of success $p \in (0,1)$. Derive a non-degenerate limiting distribution for $s^2$. What happens to this limiting distribution when $p = 1/2$ ?
 
+$$
+\begin{aligned}
+ s^2 = \frac{2}{n(n-1)} \sum_{i < j} \frac{1}{2} (X_i - X_j)^2 & = \binom{n}{2}^{-1} \sum_{i < j} \frac{1}{2} (X_i - X_j)^2 \\
+ & = \frac{1}{n-1}\sum_{i=1}^n(X_i-\bar{X})^2\\
+ (n-1)s^2 & = \sum_{i=1}^n ((X_i-p)-(\bar{X}-p))^2\\
+ & =  \sum_{i=1}^n(X_i-p)^2 -2 \sum_{i=1}^n(X_i- p)(\bar{X}-p) +  \sum_{i=1}^n(\bar{X}-p)^2\\
+ & = \sum_{i=1}^n(X_i-p)^2  -n(\bar{X}-p)^2\\
+ \sqrt{n}(s^2-p(1-p)) & = \frac{\sqrt{n}}{n-1}\sum_{i=1}^n(X_i-p)^2  -\sqrt{n}p(1-p) - \frac{\sqrt{n}}{n-1} n(\bar{X}-p)^2\\
+ &=  \frac{\sqrt{n}}{n-1}\sum_{i=1}^n(X_i-p)^2  -\sqrt{n}\frac{n-1}{n-1}p(1-p) - \frac{n}{n-1} \sqrt{n}(\bar{X}-p)^2\\
+  &=  \frac{n\sqrt{n}}{n-1}\frac{1}{n}\sum_{i=1}^n(X_i-p)^2  -\sqrt{n}\frac{n-1}{n-1}p(1-p) - \frac{n}{n-1} \sqrt{n}(\bar{X}-p)^2\\
+    &=  \frac{n}{n-1}\left(\sqrt{n}(\frac{1}{n}\sum_{i=1}^n(X_i-p)^2-p(1-p))\right)  +\frac{\sqrt{n}}{n-1}p(1-p) - \frac{n}{n-1} \sqrt{n}(\bar{X}-p)^2\\
+\end{aligned}
+$$
+
+Note as $n\to\infty$, $\frac{n}{n-1} \to 1, \frac{\sqrt{n}}{n-1}\to 0$. Furthermore, note that $\sqrt{n}(\bar{X}-p)^2 = \sqrt{n}(\bar{X}-p)(\bar{X}-p)$. $(\bar{X}-p) \overset{p}{\to} 0$, $\sqrt{n}(\bar{X}-p) \overset{d}{\to} N(0,p(1-p))$ by the Central Limit Theorem. As such, by Slutsky's, $\sqrt{n}(\bar{X}-p)^2 \overset{d}{\to} 0$.
+
+Thus the problem simplies to finding the limiting distribution of $\frac{1}{n}\displaystyle\sum_{i=1}^n(X_i-p)^2$ using the central limit theorem. $E((X_i-p)^2) = E(X_i^2 - 2pX_i + p^2) = p^2 + p(1-p)-2p^2 +p^2 = p(1-p)$. $V(X_i-p)^2 = E((X_i-p)^4) - (p(1-p)^2) = \mu_4 - (p(1-p))^2$. For a bernoulli distribution, the 4th central moment is $p(1-p)(1-3p(1-p))$. 
+
+Thus as $n \to \infty$, $\sqrt{n}(s^2 - p(1-p)) \equiv \sqrt{n}(\frac{1}{n}\sum_{i=1}^n(X_i-p)^2-p(1-p)) \overset{d}{\to}N(0,p(1-p)(1-3p(1-p))-(p(1-p))^2)$ by the Central Limit Theorem.
+
+When $p = \frac{1}{2}$, $p(1-p)(1-3p(1-p))-(p(1-p))^2) = 0$, resulting in a degenerate point mass.
+
 # Problem 4
 We now consider the problem of goodness-of-fit test for Erdos-Renyi graphs. More specifically, let $\mathcal{G} = \mathcal{G}(n,m,p, q)$ be a random graph model defined as follows. A graph $G$ is an instance of $\mathcal{G}$ if $G$ is an undirected graph on $n$ vertices with adjacency matrix $\mathbf{A} = (a_{ij})$ of the form
 \begin{gather*}
@@ -300,5 +322,20 @@ max(degree(A))
 sum(count_triangles(A))/3
 ```
 
+
+```{r, message=FALSE}
+library(igraph)
+p <- 0.4
+q <- 0.6
+n <- 1000
+m <- 10
+B <- matrix(c(p,p,p,q),nrow = 2)
+A <- sbm.game(n = n, pref.matrix = B, block.sizes = c(n-m,m))
+A
+
+max(degree(A))
+sum(count_triangles(A))/3
+
+```
 
 
