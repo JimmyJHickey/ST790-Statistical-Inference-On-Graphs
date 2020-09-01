@@ -326,9 +326,7 @@ delta_power = function(p, q, n, m, alpha, reps)
     
     y = -2 * log(n) + (sqrt(2) *(-n * phat + delta) * log(n) ) / (sqrt(n * phat *(1-phat) * log(n))) + 1/2*log(4 * pi * log(n))
     
-    # is this power??
-    power_delta =1- pgumbel(y, 0 , 1) 
-    pvals[i] = power_delta
+    pvals[i] =1- pgumbel(y, 0 , 1) 
   }
   
   return(sum(pvals<=alpha)/length(pvals))
@@ -352,23 +350,22 @@ cat("delta_10\t", delta_10, "\ndelta_25\t", delta_25, "\ndelta_50\t", delta_50, 
 tau_power = function(p, q, n, m, alpha, reps)
 {
   require(igraph)
-  pvals = rep(0,reps)
   
-
+  pvals = rep(1, reps)
   for (i in 1:reps)
   {
     B <- matrix(c(p,p,p,q),nrow = 2)
     A <- sbm.game(n = n, pref.matrix = B, block.sizes = c(n-m,m))
-    tau = sum(count_triangles(A))/3
     
     # naive estimate of edge probability
     num_edges = ecount(A)
     phat =  num_edges / choose(n, 2)
-
     
-    tau_test = (tau - choose(n, 3)*phat^3) / ( (n-2)*phat^2*sqrt(choose(n,2) *phat * (1-phat)) )
-
-    pvals[i] = 1-pnorm(tau_test, 0, 1)
+    tau = sum(count_triangles(A))/3
+  
+    tau_test = (tau - choose(n,3)*phat^3) / ((n - 2) * p^2 * sqrt( choose(n, 2) * phat * (1-phat)))
+    
+    pvals[i] = 1 - pnorm(tau_test, 0, 1)
   }
   
   return(sum(pvals<=alpha)/length(pvals))

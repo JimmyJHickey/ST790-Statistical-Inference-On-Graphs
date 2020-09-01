@@ -1,5 +1,0 @@
-"0","    # naive estimate of edge probability
-    num_edges = ecount(A)
-"
-"2","Error in ""igraph"" %in% class(graph) : object 'A' not found
-"
