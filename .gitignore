@@ -1,1 +1,5 @@
-.Rproj
+*.Rhistory
+*.Rproj
+*.tex
+*.log
+*.html
