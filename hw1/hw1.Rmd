@@ -44,8 +44,7 @@ hub <- hub_score(g)$vector
 auth <- authority_score(g)$vector
 
 nodeinfo <- as.data.frame(labels)
-nodeinfo <- mutate(nodeinfo, val = val, close=closeness, between=betweenness, pg = pg, 
-                   katz = katz, hub = hub, auth = auth)
+nodeinfo <- mutate(nodeinfo, val = val, close=closeness, between=betweenness, pg = pg, katz = katz, hub = hub, auth = auth)
 
 pgrank    <- nodeinfo %>% arrange(desc(close)) %>%  select(labels) %>%head(n=10) 
 
@@ -306,35 +305,78 @@ Perform a simulation study to determine the power of the test procedures when we
 **Hint** To generate a graph from the $\mathcal{G}(n,m,p,q)$ when $m > 0$, you can use the following igraph chunk.
 
 ```{r, message = FALSE}
-library(igraph)
+
+delta_power = function(p, q, n, m, alpha, reps)
+{
+  # Extreme Value Distributions package for Gumbel distribution
+  require(evd)
+  require(igraph)
+  pvals = rep(0,reps)
+  
+
+  for (i in 1:reps)
+  {
+    B <- matrix(c(p,p,p,q),nrow = 2)
+    A <- sbm.game(n = n, pref.matrix = B, block.sizes = c(n-m,m))
+    delta = max(degree(A))
+      
+    # naive estimate of edge probability
+    num_edges = ecount(A)
+    phat =  num_edges / choose(n, 2)
+    
+    y = -2 * log(n) + (sqrt(2) *(-n * phat + delta) * log(n) ) / (sqrt(n * phat *(1-phat) * log(n))) + 1/2*log(4 * pi * log(n))
+    
+    pvals[i] =1- pgumbel(y, 0 , 1) 
+  }
+  
+  return(sum(pvals<=alpha)/length(pvals))
+}
+
+n_reps = 100
 p <- 0.4
 q <- 0.6
 n <- 1000
-m <- 10
-B <- matrix(c(p,p,p,q),nrow = 2)
-A <- sbm.game(n = n, pref.matrix = B, block.sizes = c(n-m,m))
-A
-```
+alpha = 0.05
 
-The maximum degree and the number of triangles can be easily determined via
-```{r}
-max(degree(A))
-sum(count_triangles(A))/3
-```
+delta_10 = delta_power(p,q,n, m= 10, alpha, n_reps)
+delta_25 = delta_power(p,q,n, m= 25, alpha, n_reps)
+delta_50 = delta_power(p,q,n, m= 50, alpha, n_reps)
+delta_100 = delta_power(p,q,n, m= 100, alpha, n_reps)
 
+cat("delta_10\t", delta_10, "\ndelta_25\t", delta_25, "\ndelta_50\t", delta_50, "\ndelta_100\t", delta_100)
 
-```{r, message=FALSE}
-library(igraph)
-p <- 0.4
-q <- 0.6
-n <- 1000
-m <- 10
-B <- matrix(c(p,p,p,q),nrow = 2)
-A <- sbm.game(n = n, pref.matrix = B, block.sizes = c(n-m,m))
-A
+### Triangles
 
-max(degree(A))
-sum(count_triangles(A))/3
+tau_power = function(p, q, n, m, alpha, reps)
+{
+  require(igraph)
+  
+  pvals = rep(1, reps)
+  for (i in 1:reps)
+  {
+    B <- matrix(c(p,p,p,q),nrow = 2)
+    A <- sbm.game(n = n, pref.matrix = B, block.sizes = c(n-m,m))
+    
+    # naive estimate of edge probability
+    num_edges = ecount(A)
+    phat =  num_edges / choose(n, 2)
+    
+    tau = sum(count_triangles(A))/3
+  
+    tau_test = (tau - choose(n,3)*phat^3) / ((n - 2) * p^2 * sqrt( choose(n, 2) * phat * (1-phat)))
+    
+    pvals[i] = 1 - pnorm(tau_test, 0, 1)
+  }
+  
+  return(sum(pvals<=alpha)/length(pvals))
+}
+
+tau_10 =tau_power(p,q,n, m= 10, alpha, n_reps)
+tau_25 =tau_power(p,q,n, m= 25, alpha, n_reps)
+tau_50 =tau_power(p,q,n, m= 50, alpha, n_reps)
+tau_100 =tau_power(p,q,n, m= 100, alpha, n_reps)
+
+cat("tau_10\t", tau_10, "\ntau_25\t", tau_25, "\ntau_50\t", tau_50, "\ntau_100\t", tau_100)
 
 ```
 

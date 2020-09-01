@@ -1,0 +1,283 @@
+---
+title: "Homework 1"
+author: "David Elsheimer"
+date: "Due @ 11:59pm on August 30, 2019"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+header-includes:
+- \usepackage{bm}
+- \usepackage{amsthm}
+- \newcommand{\Real}{\mathbb{R}}
+- \newcommand{\dom}{{\bf dom}\,}
+- \newcommand{\Tra}{^{\sf T}} % Transpose
+- \newcommand{\Inv}{^{-1}} % Inverse
+- \def\vec{\mathop{\rm vec}\nolimits}
+- \def\sweep{\mathop{\rm sweep}\nolimits}
+- \newcommand{\diag}{\mathop{\rm diag}\nolimits}
+- \newcommand{\tr}{\operatorname{tr}} % Trace
+- \newcommand{\epi}{\operatorname{epi}} % epigraph
+- \newcommand{\V}[1]{{\bm{\mathbf{\MakeLowercase{#1}}}}} % vector
+- \newcommand{\VE}[2]{\MakeLowercase{#1}_{#2}} % vector element
+- \newcommand{\Vn}[2]{\V{#1}^{(#2)}} % n-th vector
+- \newcommand{\Vtilde}[1]{{\bm{\tilde \mathbf{\MakeLowercase{#1}}}}} % vector
+- \newcommand{\Vhat}[1]{{\bm{\hat \mathbf{\MakeLowercase{#1}}}}} % vector
+- \newcommand{\VtildeE}[2]{\tilde{\MakeLowercase{#1}}_{#2}} % vector element
+- \newcommand{\M}[1]{{\bm{\mathbf{\MakeUppercase{#1}}}}} % matrix
+- \newcommand{\ME}[2]{\MakeLowercase{#1}_{#2}} % matrix element
+- \newcommand{\Mtilde}[1]{{\bm{\tilde \mathbf{\MakeUppercase{#1}}}}} % matrix
+- \newcommand{\Mhat}[1]{{\bm{\hat \mathbf{\MakeUppercase{#1}}}}} % matrix
+- \newcommand{\Mcheck}[1]{{\bm{\check \mathbf{\MakeUppercase{#1}}}}} % matrix
+- \newcommand{\Mbar}[1]{{\bm{\bar \mathbf{\MakeUppercase{#1}}}}} % matrix
+- \newcommand{\Mn}[2]{\M{#1}^{(#2)}} % n-th matrix
+---
+
+**Part 1.** 
+
+1. Recall that the product property states:
+
+Let $f_1 = \mathcal{O}(g_1)$ and $f_2 = \mathcal{O}(g_2)$ Then $f_1 f_2 = \mathcal{O}(g_1g_2)$.
+
+Prove the product property.
+
+**Answer:**
+
+\begin{proof}
+
+Note by the definition of big $\mathcal{O}$-notation there exist $M_1, M_2, n_1, n_2$ such that $\lvert f_i(n)\rvert \leq M_i\lvert g_i(n)\rvert \ \forall n \geq n_i$.
+
+Consider $M_{12} = max\{M_1,M_2\}, n_{12} = max\{n_1,n_2\}$. Further note  $\lvert f_i(n)\rvert \leq M_{1}M_2\lvert g_i(n)\rvert  \leq M_{12}\lvert g_i(n)\rvert \ \forall n \geq n_{12}$.
+
+Before proceeding, note that $\lvert ab\rvert = \lvert a\rvert\lvert b\rvert$. This is easily shown by noting that $\lvert ab\rvert = \sqrt{(ab)^2} = \sqrt{a^2}\sqrt{b^2} = \lvert a\rvert\lvert b\rvert$.
+
+$\lvert f_1(n)f_2(n)\rvert = \lvert f_1(n)\rvert\lvert f_2(n)\rvert\leq M_{1}M_2\lvert g_1(n)\rvert\lvert g_2(n)\rvert= M_{1}M_2\lvert g_1(n)g_2(n)\rvert$ for all $n \geq n_{12}$ and $\hat{M} = M_1M_2$.
+
+Then $f_1 f_2 = \mathcal{O}(g_1g_2)$.
+
+\end{proof}
+
+2. Let $\V{v} \in \Real^n$ be a vector with unit Euclidean length, i.e. $\lVert \V{v} \rVert_2 = 1$. The Householder reflection of a point $\V{x} \in \Real^n$ about the hyperplane that is orthogonal to $\V{v}$ is given by
+
+$$
+h(\V{x}; \V{v}) = \V{x} - 2 \V{x}\Tra\V{v}\V{v}.
+$$
+What is the fewest number of flops needed to compute the Householder reflection $h(\V{x}; \V{v})$?
+
+**Answer:**
+
+To compute $\V{x}\Tra\V{v}$, n + n-1 operations must be performed. This term is a scalar, so 2 $\V{x}\Tra\V{v}$ is computed in n+n = 2n flops. Thus 2 $\V{x}\Tra\V{v}\V{v}$ consists of 3n flops.
+
+Therefore, $\V{x} - 2\V{x}\Tra\V{v}\V{v}$ will consist of 4n flops. This is the fewest flops necessary to compute the Householder reflection.
+
+
+**Part 2.** Estimating areas under curves via Monte Carlo
+
+You will use a Monte Carlo method to estimate areas under a curve, specifically the Gaussian density function 
+$$
+\text{AUC}(a,b) = \int_a^b f(x)dx,
+$$
+where $f(x) = \frac{1}{\sqrt{2\pi}}e^{-\frac{x^2}{2}}$. We will estimate the integral by throwing $n$ darts at random onto a rectangular canvas $[a,b] \times [0, 1/\sqrt{2\pi}]$ and counting the fraction of darts that fall under the curve $f$ on the canvas.
+
+```{r, echo=FALSE, fig.height=3, fig.width=6}
+n <- 1e3
+x <- seq(-5, 5, length.out=n)
+f <- dnorm(x)
+plot(x, f, type='l', xlab='', ylab='')
+```
+
+Let $X_i$ and $Y_i$ denote the $x$ and $y$ coordinates of the $i$th dart. Suppose that $X_i$ and $Y_i$ are iid uniform$[a,b]$ random variables and iid uniform$[0,\sqrt{2\pi}\Inv]$ random variables respectively. Let $A_i$ denote the event that $Y_i \leq f(X_i)$. Then
+
+$$
+\text{AUC}(a,b) =  \frac{b-a}{\sqrt{2\pi}} P(A_1).
+$$
+
+We can estimate $\text{AUC}(a,b)$ by plugging in an estimate of $P(A_1)$, namely
+$$
+P(A_1) \approx \frac{1}{n}\sum_{i=1}^n I(A_i),
+$$
+where $I(A_i)$ is the indicator function of the event $A_i$.
+
+Please complete the following steps.
+
+**Step 0:** Make an R package entitled "your_unityidST758". My unity id is "ecchi", so I would make a package entitled ecchiST758. For the following functions, save them all in a file called `homework1.R` and put this file in the R subdirectory of your package.
+
+**Step 1:** Write a function "estimate_auc" that computes an estimate of the area under the curve given a number of darts `n`.
+
+
+```{r, echo=TRUE}
+#' Estimate auc
+#' 
+#' \code{estimate_auc} estimates the area under the curve via Monte Carlo
+#' 
+#' @param n number of darts to throw
+#' @param a left limit
+#' @param b right limit
+#' @export
+estimate_auc <- function(n, a, b) {
+((b-a)/(n*sqrt(2*pi)))*sum(exp(-(runif(n, a, b))^2/2)/sqrt(2*pi) 
+                           >= runif(n, 0, 1/sqrt(2*pi)))
+  
+}
+```
+Your function should return an estimate of $\text{AUC}(a,b)$.
+
+
+
+
+**Step 2:**  Plot your estimate of $\text{AUC}(-1,1)$ as a function of $n$ for $n = 10, 100, 1000, 10000$. Add a horizontal line at the true value of the quantity you are trying to estimate, namely $y = \text{AUC}(-1,1)$.
+
+**Answer:**
+
+Note the true value of $AUC(-1,1)= \int_a^b \frac{1}{\sqrt{2\pi}}e^{-\frac{x^2}{2}}dx = \Phi(1) - \Phi(-1)$. This can easily be calculated in R using $\texttt{pnorm}$. The true value is found to be 0.6826895.
+
+A vector of values of the estimated AUC for $n \in \{10,100,1000,10000\}$ is provided below.
+
+```{r, echo=TRUE, warning=FALSE}
+library(ggplot2)
+set.seed(1002)
+aucest<- c(estimate_auc(10,-1,1),
+estimate_auc(1e2,-1,1),
+estimate_auc(1e3,-1,1),
+estimate_auc(1e4,-1,1))
+num<- c(10,100,1000,10000)
+plotdata<- as.data.frame(cbind(num,aucest))
+plotdata
+ggplot(data = plotdata, aes(x=num, y=aucest)) + geom_point()+
+    geom_line(linetype="dashed")+geom_hline(yintercept=0.6826895, color = "red")
+```
+
+**Step 3:** Let $Z_1, Z_2, ..., Z_n$ denote $n$ independent identically distributed random variables such that $\lvert Z_i \rvert \leq 1$ for $i = 1, ..., n.$ Let $\overline{Z}$ denote the sample mean of $Z_i$ and $\mu$ denote the mean of $Z_1$. Recall that the Hoeffding bound tell us that
+
+$$
+P(\lvert \overline{Z} - \mu \rvert \geq t) \leq 2 \exp(-2 n t^2).
+$$
+
+Explain how you can use the Hoeffding bound to assess the correctness of your function `estimate_auc` and then write a small R script below illustrating your evaluation. Suggestion: Consider redoing Step 2 using more information like multiple replicates, boxplots, and a thoughtful application of the Hoeffding bound.
+
+**Answer:**
+
+Here, $Z_i = I(Y_i \leq f(X_i))$. The $Z_i$'s are i.i.d., and $|Z_i| \leq 1$. Thus a Hoeffding bound is applicable here. $\bar{Z} = \frac{1}{n}\sum_{i=1}^nZ_i$. Here $E(Z_i) = P(Y_i \leq f(X_i))$. Due to $Y_i$'s being i.i.d, as well as $X_i$'s being i.i.d., this can be further generalized as $P(Y\leq f(X))$.
+
+Further note that $P(Y\leq f(X)) = \frac{S}{c(b-a)}$, where $a,b$ are the bounds for $X_i$, and $c$ is the maximum density of $f(X)$, and $S$ is the area under the curve.
+
+Therefore, $S = c(b-a)P(Y \leq f(X))\approx c(b-a)\bar{Z}$. 
+
+Applying the Hoeffding bound, $P(|c(b-a)\bar{Z} - c(b-a)P(Y\leq f(X))| \geq c(b-a)t)\leq 2\exp(-2n(c(b-a)t)^2)$.
+
+Applying what has been demonstrated above, we can assess the correctness of `estimate_auc` using the following R script.
+
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+library(tidyr)
+library(dplyr)
+library(forcats)
+set.seed(1002)
+#Simulating estimates for different levels of n
+#Creating boxplots at each level
+num<- c(10,50,100,500,1000,5000,10000)
+auc_eval <- replicate(sapply(num,a=-1,b=1, estimate_auc), n =1000)
+auc_data <- as.data.frame(t(auc_eval)) 
+colnames(auc_data) <- c("10", "50", "100", "500","1000","5000","10000")
+longauc <- gather(auc_data,key=num)
+longauc$num<-factor(longauc$num, levels=c("10", "50", "100", "500","1000","5000","10000"))
+ggplot(data = longauc, aes(x=num, y=value)) + geom_boxplot() +
+    geom_hline(yintercept=0.6826895, color = "red") + 
+  xlab("Number of darts thrown") + 
+  ylab("Area under curve via MC")
+#Checking that the probablities will be less than the bounds
+probbound<-function(n,t){
+  2*exp(-2*n*t**2)
+}
+true_y <- pnorm(1)-pnorm(-1)
+longauc$count_tol1 <- 1- as.numeric(between(longauc$value,true_y-0.1,true_y+0.1))
+longauc$count_tol2 <- 1-as.numeric(between(longauc$value,true_y-0.05,true_y+0.05))
+longauc$count_tol3 <- 1-as.numeric(between(longauc$value,true_y-0.025,true_y+0.025))
+probapprox <- longauc %>% group_by(num)%>%
+  summarise(mean(count_tol1), mean(count_tol2),mean(count_tol3))
+orderedprob <- probapprox
+orderedprob$probtol1 <-sapply(num, t=0.1, probbound)
+orderedprob$probtol2 <-sapply(num, t=0.05, probbound)
+orderedprob$probtol3 <- sapply(num, t=0.025, probbound)
+knitr::kable(orderedprob, col.names = c("N", "$\\hat{P}(est\\notin$ tol-int 1)",
+                           " $\\hat{P}(est\\notin$ tol-int 2)", 
+                           "$\\hat{P}(est\\notin$ tol-int 3)", 
+                           "Tol1 True prob",
+                           "Tol2 True prob",
+                           "Tol3 True prob"))
+```
+
+As seen in the above simulation, for many randomly generated estimates, as $n$ increases, the accuracy of the estimate improves. This is clear from how the boxplots get much smaller as $n$ increases. The second portion of the simulation is used to verify that the sample probabilities of not being in the tolerance interval $(\Phi(1) - \Phi(-1) \pm c(b-a))$ are smaller than their corresponding Hoeffding bounds. This second portion of the simulation is performed for tolerances 0.1, 0.05, and 0.025.
+
+**Step 4:** Write a modified function, `estimate_auc_tol`, which returns an estimate of $\text{AUC}(a,b)$ that is within a specified tolerance `tol` with probability `p`, i.e. your output is within the true value of $\text{AUC}(a,b)$ plus or minus `tol` with probability $p$.
+
+```{r, echo=TRUE}
+#' Estimate auc
+#' 
+#' \code{estimate_auc_tol} estimates the area under the curve via Monte Carlo
+#' 
+#' @param a left limit
+#' @param b right limit
+#' @param tol tolerance
+#' @param p probability
+#' @export
+estimate_auc_tol <- function(a, b, tol, p) {
+  n <- -log(p/2)/(2*(tol)^2)
+  auctol <- ((b-a)/(n*sqrt(2*pi)))*sum(exp(-(runif(n, a, b))^2/2)/sqrt(2*pi) 
+                           >= runif(n, 0, 1/sqrt(2*pi)))
+  #Returning the estimated AUC with a specified tolerance, as well as the approximate n
+  return(c(auctol, ceiling(n)))
+}
+```
+
+As seen above, the primary change to this function is how `n` is calculated for given `p`, `tol`. Examples of this function being used are given below.
+
+```{r, echo=TRUE}
+estimate_auc_tol(-1,1,0.5,0.5)
+estimate_auc_tol(-1,1,1,0.1)
+estimate_auc_tol(-1,1,0.05,0.05)
+```
+
+As the probability decreases, the estimate requires larger and larger n, and the estimate trends towards the true AUC.
+
+**Answer:**
+
+The differences from the previous `estimate_auc` function come in the form of the tolerance and probability arguments. Another thing of note is that here we do not provide the function with a number of replicates, as it can be calculated using the tolerance and the probability. As defined in problem 4, the tolerance is $c(b-a)t$, and the probability derived from the Hoeffding bound will be $2\exp(-2n(c(b-a))^2)$.
+
+
+
+
+**Step 5:** Suppose instead of throwing darts at the canvas $[a, b]\times[0,1/\sqrt{2\pi}]$, you decided to throw darts at the canvas $[a, b]\times[0,c]$ for $c \geq 1/\sqrt{2\pi}$. You still count the fraction of darts that fall under the curve $f$. **Question 1:** Explain how you should modify your Monte Carlo estimator of $\text{AUC}(a,b)$ when you change the height of the canvas. **Question 2:** What do you think will happen to the quality of your estimator of $\text{AUC}(a,b)$ as $c$ increases? **Question 3:** Design and run a simulation experiment that illustrates the change in quality that you anticipate. Use a modified version of your 'estimate_auc' function called 'estimate_auc_modified'.
+
+```{r, echo=TRUE}
+#' Estimate auc modified
+#' 
+#' \code{estimate_auc_modified} estimates the area under the curve via Monte Carlo
+#' 
+#' @param n number of darts to throw
+#' @param a left limit
+#' @param b right limit
+#' @param c canvas dimension variable
+#' @export
+estimate_auc_modified <- function(n, a, b, c=1/sqrt(2*pi)) {
+if(c< 1/sqrt(2*pi)) stop("Canvas height too low")
+  
+  ((b-a)/(n*sqrt(2*pi)))*sum(exp(-(runif(n, a, b))^2/2)/sqrt(2*pi) 
+                           >= runif(n, 0, c))
+  
+}
+```
+Your function should return an estimate of $\text{AUC}(a,b)$ and should return an error if $c < 1/\sqrt{2\pi}$.
+
+**Answer:**
+
+The modification is simple. The change here is that $Y \sim U(0,c)$. This will change the estimator with respect to how the height of the canvas changes. Notice that  for fixed $a,b$ where $b>a$, X is bounded between $(\frac{1}{\sqrt{2\pi}}e^{-b^2/2}, \frac{1}{\sqrt{2\pi}})$. As c increases, $P(A_1) \approx \frac{1}{n}\sum_{i=1}^nI(A_i)$ will decrease because it will become increasingly likely that there will be values of $y_i>f(x_i)$. Thus the quality of the estimator will decrease for greater values of $c$. This can be coded fairly easily, as seen above and in the dbelsheiST758 package. A condition is included to return errors for canvases shorter than the minimum height.
+
+```{r, echo = TRUE, error=TRUE}
+set.seed(1002)
+#demonstrating the behavior
+estimate_auc_modified(10,-1,1, c= .1)
+estimate_auc_modified(10,-1,1)
+estimate_auc_modified(10,-1,1, c= 3)
+estimate_auc_modified(10,-1,1, c= 4)
+```
