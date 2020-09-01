@@ -375,9 +375,12 @@ tau_10 =tau_power(p,q,n, m= 10, alpha, n_reps)
 tau_25 =tau_power(p,q,n, m= 25, alpha, n_reps)
 tau_50 =tau_power(p,q,n, m= 50, alpha, n_reps)
 tau_100 =tau_power(p,q,n, m= 100, alpha, n_reps)
+tau_200 =tau_power(p,q,n, m= 200, alpha, n_reps)
+tau_400 =tau_power(p,q,n, m= 400, alpha, n_reps)
 
-cat("tau_10\t", tau_10, "\ntau_25\t", tau_25, "\ntau_50\t", tau_50, "\ntau_100\t", tau_100)
+cat("tau_10\t", tau_10, "\ntau_25\t", tau_25, "\ntau_50\t", tau_50, "\ntau_100\t", tau_100,
+    "\ntau_200\t", tau_200,"\ntau_400\t", tau_400)
 
 ```
-
+As seen for both cases, as $m$ increases, power increases. However, the test statistic for the number of triangles is smaller than the test statistic for max degree, and thus for meaningful results, greater levels of $m$ must be considered for that test.
 
