@@ -1,1 +1,4 @@
-"0","knitr::opts_chunk$set(echo = TRUE)"
+"0","```{r setup, include=FALSE}
+"
+"2","Error: attempt to use zero-length variable name
+"
