@@ -1,0 +1,248 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames*,x11names*}{xcolor}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={ST 790 Assignment 1},
+  colorlinks=true,
+  linkcolor=Maroon,
+  filecolor=Maroon,
+  citecolor=Blue,
+  urlcolor=blue,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\title{ST 790 Assignment 1}
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+\maketitle
+
+\hypertarget{instruction}{%
+\subsection{Instruction}\label{instruction}}
+
+This assignment consists of \(4\) problems. The assignment is due on
+\textbf{Tuesday, September 1} at 11:59pm EDT. Please submit your
+assignment electronically through the \textbf{Moodle} webpage. The
+assignment can be done as a group with at most 3 members per group
+(please include the name of the group members on the front page of the
+assignment).
+
+\hypertarget{problem-1}{%
+\section{Problem 1}\label{problem-1}}
+
+Download the political blogs dataset from
+\href{http://www-personal.umich.edu/~mejn/netdata/}{here}. Now find the
+say, top ten, most ``central'' or ``important'' vertices via e.g.,
+closeness centrality, betweeness centrality, Katz centrality, page-rank
+centrality, and hubs/authority centrality. Does the blogs that you
+identified similar to that in Table 1 through Table 3 of
+\href{http://www.ramb.ethz.ch/CDstore/www2005-ws/workshop/wf10/AdamicGlanceBlogWWW.pdf}{Adamic
+and Glance} ?
+
+\hypertarget{problem-2}{%
+\section{Problem 2}\label{problem-2}}
+
+Skim through this \href{https://arxiv.org/pdf/0706.1062.pdf}{article} by
+Clauset, Shalizi, and Newman. Now download the yeast metabolic network
+dataset from
+\href{http://tuvalu.santafe.edu/~aaronc/powerlaws/data.htm}{here}. Fit a
+power-law to the degree distribution for this dataset. Do you think the
+degree distribution for this network follows a power-law ?
+
+\hypertarget{problem-3}{%
+\section{Problem 3}\label{problem-3}}
+
+Let \(X_1, X_2, \dots, X_n\) be i.i.d random variables. The sample
+variance of the \(X_i\) can be written as a \(U\)-statistics, i.e.,
+\[s^2 = \frac{2}{n(n-1)} \sum_{i < j} \frac{1}{2} (X_i - X_j)^2.\]
+Suppose now the \(X_i\) are i.i.d Bernoulli random variables with
+probability of success \(p \in (0,1)\). Derive a non-degenerate limiting
+distribution for \(s^2\). What happens to this limiting distribution
+when \(p = 1/2\) ?
+
+\hypertarget{problem-4}{%
+\section{Problem 4}\label{problem-4}}
+
+We now consider the problem of goodness-of-fit test for Erdos-Renyi
+graphs. More specifically, let \(\mathcal{G} = \mathcal{G}(n,m,p, q)\)
+be a random graph model defined as follows. A graph \(G\) is an instance
+of \(\mathcal{G}\) if \(G\) is an undirected graph on \(n\) vertices
+with adjacency matrix \(\mathbf{A} = (a_{ij})\) of the form
+\begin{gather*}
+a_{ij} \sim \mathrm{Bernoulli}(q), \quad \text{if $i \in \mathcal{S}$ and $j \in \mathcal{S}$} \\
+a_{ij} \sim \mathrm{Bernoulli}(p), \quad \text{otherwise}.
+\end{gather*} Here \(\mathcal{S} \subset \{1,2,\dots,n\}\) is a subset
+of vertices with \(|\mathcal{S}| = m\) and we have assumed that
+\(q > p \in (0,1)\). Note that \(m = 0\) corresponds to the normal
+Erdos-Renyi graph and \(m > 0\) corresponds to a random graph model
+where there is a subset \(\mathcal{S}\) of \(m\) vertices with larger
+communication probability \(q\) among themselves.
+
+Given a graph \(G \sim \mathcal{G}(n,m,p,q)\), we are interested in
+testing the null hypothesis
+\(\mathbb{H}_0 \colon |\mathcal{S}| = m = 0\) against the alternative
+hypothesis that \(\mathbb{H}_A \colon |\mathcal{S}| = m > 0\).
+
+For this problem, we will use two test statistics. The first test
+statistic is \(\Delta\), the maximum degree and the second test
+statistic is \(\tau\), the number of triangles. More specifically, given
+a graph \(G \sim \mathcal{G}(n,m,p,q)\), and suppose we are using
+\(\Delta\) as the test statistic. Then we will reject the null
+hypothesis if \(\Delta\) exceeds some threshold \(c\).
+
+Perform a simulation study to determine the power of the test procedures
+when we use (1) \(\Delta\) as the test statistic and (2) when we use
+\(\tau\) as the test statistic. To reduce computation time, set
+\(n = 1000\), \(p = 0.4\), and \(q = 0.6\) and let
+\(m \in \{10,25,50,100\}\). Report a table for the power of the test
+statistics as a function of \(m\).
+
+\textbf{Hint} To generate a graph from the \(\mathcal{G}(n,m,p,q)\) when
+\(m > 0\), you can use the following igraph chunk.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(igraph)}
+\NormalTok{p <-}\StringTok{ }\FloatTok{0.4}
+\NormalTok{q <-}\StringTok{ }\FloatTok{0.6}
+\NormalTok{n <-}\StringTok{ }\DecValTok{1000}
+\NormalTok{m <-}\StringTok{ }\DecValTok{10}
+\NormalTok{B <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\KeywordTok{c}\NormalTok{(p,p,p,q),}\DataTypeTok{nrow =} \DecValTok{2}\NormalTok{)}
+\NormalTok{A <-}\StringTok{ }\KeywordTok{sbm.game}\NormalTok{(}\DataTypeTok{n =}\NormalTok{ n, }\DataTypeTok{pref.matrix =}\NormalTok{ B, }\DataTypeTok{block.sizes =} \KeywordTok{c}\NormalTok{(n}\OperatorTok{-}\NormalTok{m,m))}
+\NormalTok{A}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## IGRAPH d5c23cc U--- 1000 199852 -- Stochastic block-model
+## + attr: name (g/c), loops (g/l)
+## + edges from d5c23cc:
+##  [1]  1-- 3  1-- 4  3-- 6  1-- 7  2-- 7  4-- 7  4-- 9  5-- 9  6-- 9  1--10
+## [11]  3--10  8--10  9--10  3--11  5--11 10--11  1--12  2--12  7--12  8--12
+## [21]  9--12 11--12  8--13 10--13  2--14  4--14  5--14  6--14  9--14  1--15
+## [31]  2--15  3--15  4--15  6--15  8--15  9--15 14--15  5--16  6--16  7--16
+## [41]  9--16 11--16 12--16 13--16 15--16  4--17  5--17 11--17 13--17 14--17
+## [51]  1--18 13--18  1--19  5--19  6--19  7--19  8--19 10--19 13--19 14--19
+## [61] 15--19 16--19  1--20  4--20  5--20  6--20  7--20 10--20 19--20  3--21
+## [71]  4--21  5--21  6--21  8--21 13--21 15--21 16--21 20--21  1--22  2--22
+## + ... omitted several edges
+\end{verbatim}
+
+The maximum degree and the number of triangles can be easily determined
+via
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{max}\NormalTok{(}\KeywordTok{degree}\NormalTok{(A))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 444
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{sum}\NormalTok{(}\KeywordTok{count_triangles}\NormalTok{(A))}\OperatorTok{/}\DecValTok{3}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 10641461
+\end{verbatim}
+
+\end{document}

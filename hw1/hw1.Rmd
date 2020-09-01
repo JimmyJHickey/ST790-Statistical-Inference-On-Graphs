@@ -2,9 +2,10 @@
 title: "ST 790 Assignment 1"
 author: "David Elsheimer and Jimmy Hickey"
 date: "9/1/2020"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 urlcolor: blue
-
 ---
 
 
@@ -28,7 +29,7 @@ library(igraph)
 library(dplyr)
 library(xtable)
 ```
-# Different Centrality Metric Rankings (Overall, Liberal, & Conservative)
+## Different Centrality Metric Rankings (Overall, Liberal, & Conservative)
 
 ```{r, warning=FALSE}
 g<-read.graph("polblogs.gml",format=c("gml"))
@@ -258,12 +259,19 @@ mod$coefficients ##``Estimate'' of exponent in power-law
 plot(log(1:length(deg_dist),10),log(deg_dist,10),
 xlab = "degree (log-scale)", ylab = "cumulative frequency (log-scale)",abline(mod))
 ```
+
  Based on the above comparison of the data to the fitted power law, it appears that the degree distribution does indeed follow a power law.
 
 # Problem 3
 Let $X_1, X_2, \dots, X_n$ be i.i.d random variables. The sample variance of the $X_i$ can be written as a $U$-statistics, i.e.,
 $$s^2 = \frac{2}{n(n-1)} \sum_{i < j} \frac{1}{2} (X_i - X_j)^2.$$
 Suppose now the $X_i$ are i.i.d Bernoulli random variables with probability of success $p \in (0,1)$. Derive a non-degenerate limiting distribution for $s^2$. What happens to this limiting distribution when $p = 1/2$ ?
+
+
+https://stats.stackexchange.com/questions/105337/asymptotic-distribution-of-sample-variance-of-non-normal-sample
+
+4th central moment:
+https://en.wikipedia.org/wiki/Bernoulli_distribution#Higher_moments_and_cumulants
 
 # Problem 4
 We now consider the problem of goodness-of-fit test for Erdos-Renyi graphs. More specifically, let $\mathcal{G} = \mathcal{G}(n,m,p, q)$ be a random graph model defined as follows. A graph $G$ is an instance of $\mathcal{G}$ if $G$ is an undirected graph on $n$ vertices with adjacency matrix $\mathbf{A} = (a_{ij})$ of the form
@@ -284,21 +292,73 @@ Perform a simulation study to determine the power of the test procedures when we
 **Hint** To generate a graph from the $\mathcal{G}(n,m,p,q)$ when $m > 0$, you can use the following igraph chunk.
 
 ```{r, message = FALSE}
-library(igraph)
+
+delta_power = function(p, q, n, m, reps)
+{
+  # Extreme Value Distributions package for Gumbel distribution
+  require(evd)
+  require(igraph)
+  powers = rep(0,reps)
+  
+
+  for (i in 1:reps)
+  {
+    B <- matrix(c(p,p,p,q),nrow = 2)
+    A <- sbm.game(n = n, pref.matrix = B, block.sizes = c(n-m,m))
+    delta = max(degree(A))
+      
+    # naive estimate of edge probability
+    num_edges = ecount(A)
+    phat =  num_edges / choose(n, 2)
+    
+    y = -2 * log(n) + (sqrt(2) *(-n * phat + delta) * log(n) ) / (sqrt(n * phat *(1-phat) * log(n))) + 1/2*log(4 * pi * log(n))
+    
+    # is this power??
+    power_delta = pgumbel(y, 0 , 1) 
+    powers[i] = power_delta
+  }
+  
+  return(mean(powers))
+}
+
+n_reps = 100
 p <- 0.4
 q <- 0.6
 n <- 1000
-m <- 10
-B <- matrix(c(p,p,p,q),nrow = 2)
-A <- sbm.game(n = n, pref.matrix = B, block.sizes = c(n-m,m))
-A
+
+delta_power(p,q,n, m= 10, n_reps)
+delta_power(p,q,n, m= 25, n_reps)
+delta_power(p,q,n, m= 50, n_reps)
+delta_power(p,q,n, m= 100, n_reps)
+
+
+### Triangles
+
+tau_power = function(p, q, n, m, reps)
+{
+  require(igraph)
+  powers = rep(0,reps)
+  
+
+  for (i in 1:reps)
+  {
+    B <- matrix(c(p,p,p,q),nrow = 2)
+    A <- sbm.game(n = n, pref.matrix = B, block.sizes = c(n-m,m))
+    tau = sum(count_triangles(A))/3
+    
+    tau_test = (tau - choose(n, 3)*phat^3) / ( (n-2)*phat^2*sqrt(choose(n,2) *phat * (1-phat)) )
+
+    powers[i] = pnorm(tau_test, 0, 1)
+  }
+  
+  return(mean(powers))
+}
+
+tau_power(p,q,n, m= 10, n_reps)
+tau_power(p,q,n, m= 25, n_reps)
+tau_power(p,q,n, m= 50, n_reps)
+tau_power(p,q,n, m= 100, n_reps)
+
+
 ```
-
-The maximum degree and the number of triangles can be easily determined via
-```{r}
-max(degree(A))
-sum(count_triangles(A))/3
-```
-
-
 
