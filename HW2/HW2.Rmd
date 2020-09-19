@@ -1,5 +1,7 @@
 ---
 title: "ST 790 Assignment 2"
+author: "David Elsheimer and Jimmy Hickey"
+date: "9/29/2020"
 output: pdf_document
 urlcolor: blue
 
@@ -8,6 +10,14 @@ urlcolor: blue
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, warning=FALSE, include=FALSE}
+
+library(igraph)
+library(dplyr)
+library(xtable)
+library(RColorBrewer)
 ```
 
 ## Instruction
@@ -79,6 +89,61 @@ $\Lambda$.
 # Problem 2
 
 Download the dataset of games between American College Football teams available [here](http://www-personal.umich.edu/~mejn/netdata/). Now perform community detection using (1) a spectral clustering algorithm using normalized cut (2) spectral clustering using modularity and (3) Louvain algorithm. Evaluate the performance of your clustering (compared to the given ground truth).
+
+```{r, warning=FALSE}
+g<-read.graph("football.gml",format=c("gml"))
+
+g2 <- as.undirected(g)
+## Largest connected component
+lcc <- decompose.graph(g2, min.vertices = max(components(g2)$csize))[[1]]
+Xhat2 <- embed_laplacian_matrix(lcc, type = "I-DAD", which = "sa", no = 3, scaled = FALSE)
+
+Xhat2$D ## The three smallest eigenvalue of the normalized Laplacian
+
+table(vertex_attr(lcc)$value) ## Ground truth 
+gt <- vertex_attr(lcc)$value
+gt
+
+### Getting a vector of distinct colors for use in normalized cut
+n <- 12
+qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',]
+col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
+col_vector<- col_vector[1:12]
+
+
+stripchart(Xhat2$X[,2] ~ vertex_attr(lcc)$value, method = "jitter",
+col = col_vector[1:12], xlab = "normalized Laplacian")
+
+clusters2 <- kmeans(Xhat2$X, centers = 12)
+
+table(clusters2$cluster, vertex_attr(lcc)$value)
+
+
+
+###louvain
+cc <- cluster_louvain(g2)
+
+table(cc$membership)
+
+
+###Normal cut comparison
+## Compare the clustering using normalized mutual information
+compare(clusters2$cluster, gt, method = c("nmi"))
+## Compare the clustering using Rand index
+compare(clusters2$cluster, gt, method = c("rand"))
+## Compare the clustering using adjusted Rand index
+compare(clusters2$cluster, gt, method = c("adjusted.rand"))
+
+###Louvain comparison
+## Compare the clustering using normalized mutual information
+compare(cc$membership, gt, method = c("nmi"))
+## Compare the clustering using Rand index
+compare(cc$membership, gt, method = c("rand"))
+## Compare the clustering using adjusted Rand index
+compare(cc$membership, gt, method = c("adjusted.rand"))
+
+```
+
 
 # Problem 2.5 (optional)
 Now try to do community deteciton on the Youtube network dataset available [here](http://snap.stanford.edu/data/com-Youtube.html) using any algorithm you want. Now try to evaluate the performance of your clustering compared to the given ground truth (it is not going to be easy :-))
