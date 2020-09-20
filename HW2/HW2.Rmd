@@ -15,9 +15,13 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r, warning=FALSE, include=FALSE}
 
 library(igraph)
+library(lsa)
 library(dplyr)
 library(xtable)
 library(RColorBrewer)
+library(rmatio)
+library(R.matlab)
+library(dplyr)
 ```
 
 ## Instruction
@@ -96,7 +100,7 @@ g<-read.graph("football.gml",format=c("gml"))
 g2 <- as.undirected(g)
 ## Largest connected component
 lcc <- decompose.graph(g2, min.vertices = max(components(g2)$csize))[[1]]
-Xhat2 <- embed_laplacian_matrix(lcc, type = "I-DAD", which = "sa", no = 3, scaled = FALSE)
+Xhat2 <- embed_laplacian_matrix(lcc, type = "I-DAD", which = "sa", no = 12, scaled = FALSE)
 
 Xhat2$D ## The three smallest eigenvalue of the normalized Laplacian
 
@@ -118,6 +122,12 @@ clusters2 <- kmeans(Xhat2$X, centers = 12)
 
 table(clusters2$cluster, vertex_attr(lcc)$value)
 
+###spectral with modularity
+c2 = cluster_leading_eigen(g2) 
+# as per the documentation this performs clustering by calculating the 
+#leading non-negative eigenvector of the modularity matrix of the graph. 
+# c2$membership is the membership based on the results of modularity spectral clustering
+
 
 
 ###louvain
@@ -134,6 +144,15 @@ compare(clusters2$cluster, gt, method = c("rand"))
 ## Compare the clustering using adjusted Rand index
 compare(clusters2$cluster, gt, method = c("adjusted.rand"))
 
+###modularity comparison
+## Compare the clustering using normalized mutual information
+compare(c2$membership, gt, method = c("nmi"))
+## Compare the clustering using Rand index
+compare(c2$membership, gt, method = c("rand"))
+## Compare the clustering using adjusted Rand index
+compare(c2$membership, gt, method = c("adjusted.rand"))
+
+
 ###Louvain comparison
 ## Compare the clustering using normalized mutual information
 compare(cc$membership, gt, method = c("nmi"))
@@ -143,14 +162,26 @@ compare(cc$membership, gt, method = c("rand"))
 compare(cc$membership, gt, method = c("adjusted.rand"))
 
 ```
-
+For normalized mutual information, Louvain was the largest, followed by normal cut and modularity. For Rand index, normal cut was the largest, followed by modularity and Louvain. For adjusted Rand index, Louvain was largest, followed by normal cut and modularity. Based on this, it appears to be the case that Louvain is doing the best job of correctly assesisng the data, as for adjusted Rand and NMI, Louvain appears to be closest to the truth. In the Rand index caclulation, all 3 comparison measures are pretty large, indicating that for this metric all 3 methods of clustering perform well.
 
 # Problem 2.5 (optional)
 Now try to do community deteciton on the Youtube network dataset available [here](http://snap.stanford.edu/data/com-Youtube.html) using any algorithm you want. Now try to evaluate the performance of your clustering compared to the given ground truth (it is not going to be easy :-))
 
 # Problem 3. 
 
-Download the USPS digits dataset from [here](https://cs.nyu.edu/~roweis/data.html). Next do the following steps.
+```{r, warning=FALSE}
+usps<-readMat(file.path("usps_all.mat"))$data
+usps_sub <- usps[,,c(5,8,10)]
+
+usps_4 <- usps_sub[,,1]
+usps_7 <- usps_sub[,,2]
+usps_9 <- usps_sub[,,3]
+
+usps_4[, sample(ncol(usps_4), 1)]
+
+```
+
+Download the USPS digits dataset from [here](https://cs.nyu.edu/~rowei?s/data.html). Next do the following steps.
 
 + Choose the digits for class $4, 7$ and $9$. 
 + Randomly sample $800$ digits from each class. 
@@ -158,6 +189,8 @@ Download the USPS digits dataset from [here](https://cs.nyu.edu/~roweis/data.htm
 + Run a $3$-class SVM classifier on the embeddings for these $2400$ datapoints. Use a linear kernel for your SVM.
 + With the remaining $900$ data points ($300$ from each class), evaluate the performance of your SVM classifier on this holdout data.
 + Compare this performance with say SVM classification in the original $256$ dimension data using say a linear kernel or a Gaussian kernel.
+
+
 
 **Hint** To evaluate the performance on the hold-out data, you will need to do an out-of-sample embedding. Read [this paper](https://papers.nips.cc/paper/2461-out-of-sample-extensions-for-lle-isomap-mds-eigenmaps-and-spectral-clustering.pdf) to see how to construct an out-of-sample embedding for Laplacian eigenmaps.
 
