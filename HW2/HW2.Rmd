@@ -1,0 +1,165 @@
+---
+title: "ST 790 Assignment 2"
+author: "David Elsheimer and Jimmy Hickey"
+date: "9/29/2020"
+output: pdf_document
+urlcolor: blue
+
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, warning=FALSE, include=FALSE}
+
+library(igraph)
+library(dplyr)
+library(xtable)
+library(RColorBrewer)
+```
+
+## Instruction
+This assignment consists of $4$ problems. The assignment is due on 
+**Tuesday, September 29** at 11:59pm EDT. Please submit your assignment electronically through the **Moodle** webpage.
+The assignment can be done as a group with at most 3 members per group (please include the name of the group members on the front page of the assignment).
+
+## Problem 1.
+
+Let $\mathbf{D}$ be a $n \times n$ symmetric dissimilarity matrix, i.e., the
+entries $d_{ij}$ of $\mathbf{D}$ are non-negative for all $i,j$,
+$d_{ii} = 0$ for all $i$. Let $\mathbf{B} = -\tfrac{1}{2}(\mathbf{I} -
+11^{\top}/n) \mathbf{D} (\mathbf{I} - 11^{\top}/n)$ where $\mathbf{I}$ is the $n \times n$ identity
+matrix and $1 \in \mathbb{R}^{n}$ is the vector of all ones.
+
+Given an integer $r \leq n$, 
+the classical multidimensional scaling (CMDS) procedure produces a
+configuration $\mathbf{Z}_* \in \mathbb{R}^{n \times r}$ representing
+$n$ points in $\mathbb{R}^{r}$ that best approximate $\mathbf{D}$ with
+respect to the STRAIN criterion, i.e.,
+\begin{equation}
+\label{eq:STRAIN}
+ \mathbf{Z}_* = \arg\min_{\mathbf{Z} \in \mathbb{R}^{n \times r}}
+\|\mathbf{B} - \mathbf{Z} \mathbf{Z}^{\top}\|_{F}.
+\end{equation}
+Consider the following eigendecomposition of $\mathbf{B}$. 
+$$\mathbf{B} = \sum_{i=1}^{n} \lambda_i u_i u_i^{\top};
+\quad \lambda_1 \geq \lambda_2 \geq \dots \geq \lambda_n $$
+Then the CMDS procedure returns the $n \times r$ configuration
+\begin{equation}
+  \label{eq:cmds}
+\mathbf{Z}_* = \Bigl[(\lambda_1)_{+}^{1/2} u_1,
+(\lambda_2)_{+}^{1/2} u_2, \dots, (\lambda_r)_{+}^{1/2} u_r
+\Bigr]
+\end{equation}
+where $(\lambda_i)_{+} = \max\{\lambda_i, 0\}$. 
+
+Show that the expression $\mathbf{Z}_*$ in Eq.\eqref{eq:cmds} is
+really the minimizer of the STRAIN criterion for $\mathbf{B}$. More
+specifically, show the following result.
+
+**Proposition**
+  Let $\mathbf{B}$ be a $n \times n$ symmetric matrix with
+  eigendecomposition
+$$ \mathbf{B} = \sum_{i=1}^{n} \lambda_i u_i u_i^{\top};
+\quad \lambda_1 \geq \lambda_2 \geq \dots \geq \lambda_n $$
+Then the best rank $r$, positive semidefinite approximation to
+$\mathbf{B}$, with respect to the Frobenius norm, is the matrix
+$$ \mathbf{B}_r = \sum_{i=1}^{r} (\lambda_i)_{+} u_i u_i^{\top}.$$
+
+**Hint:** Let $\mathbf{M}$ be any $n \times n$ matrix. Then
+$$ \|\mathbf{B} - \mathbf{M}\|_{F}^2 = \|\mathbf{U} \Lambda
+\mathbf{U}^{\top} - \mathbf{V} \Sigma \mathbf{V}^{\top}\|_{F}^2 = 
+\|\Lambda - \mathbf{W} \Sigma \mathbf{W}^{\top}\|_{F}^2$$
+where $\mathbf{U} \Lambda
+\mathbf{U}^{\top}$ and $\mathbf{V} \Sigma \mathbf{V}^{\top}$ are
+the eigendecomposition of $\mathbf{B}$ and $\mathbf{M}$, respectively,
+and $\mathbf{W}$ is a $n \times n$ orthogonal matrix. 
+
+Now, for fixed diagonal matrices $\Lambda$ and $\Sigma$, show that a minimizer of
+$$\min_{\mathbf{W}} \|\Lambda - \mathbf{W} \Sigma
+\mathbf{W}^{\top}\|_{F}^2$$
+over the set of orthogonal matrices $\mathbf{W}$ is given by a
+permutation matrix. Using the [rearrangement inequality](https://en.wikipedia.org/wiki/Rearrangement_inequality), 
+show that this permutation matrix will rearrange the diagonal entries of
+$\Sigma$ to coincide with the ordering of the diagonal entries of
+$\Lambda$. 
+
+# Problem 2
+
+Download the dataset of games between American College Football teams available [here](http://www-personal.umich.edu/~mejn/netdata/). Now perform community detection using (1) a spectral clustering algorithm using normalized cut (2) spectral clustering using modularity and (3) Louvain algorithm. Evaluate the performance of your clustering (compared to the given ground truth).
+
+```{r, warning=FALSE}
+g<-read.graph("football.gml",format=c("gml"))
+
+g2 <- as.undirected(g)
+## Largest connected component
+lcc <- decompose.graph(g2, min.vertices = max(components(g2)$csize))[[1]]
+Xhat2 <- embed_laplacian_matrix(lcc, type = "I-DAD", which = "sa", no = 3, scaled = FALSE)
+
+Xhat2$D ## The three smallest eigenvalue of the normalized Laplacian
+
+table(vertex_attr(lcc)$value) ## Ground truth 
+gt <- vertex_attr(lcc)$value
+gt
+
+### Getting a vector of distinct colors for use in normalized cut
+n <- 12
+qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',]
+col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
+col_vector<- col_vector[1:12]
+
+
+stripchart(Xhat2$X[,2] ~ vertex_attr(lcc)$value, method = "jitter",
+col = col_vector[1:12], xlab = "normalized Laplacian")
+
+clusters2 <- kmeans(Xhat2$X, centers = 12)
+
+table(clusters2$cluster, vertex_attr(lcc)$value)
+
+
+
+###louvain
+cc <- cluster_louvain(g2)
+
+table(cc$membership)
+
+
+###Normal cut comparison
+## Compare the clustering using normalized mutual information
+compare(clusters2$cluster, gt, method = c("nmi"))
+## Compare the clustering using Rand index
+compare(clusters2$cluster, gt, method = c("rand"))
+## Compare the clustering using adjusted Rand index
+compare(clusters2$cluster, gt, method = c("adjusted.rand"))
+
+###Louvain comparison
+## Compare the clustering using normalized mutual information
+compare(cc$membership, gt, method = c("nmi"))
+## Compare the clustering using Rand index
+compare(cc$membership, gt, method = c("rand"))
+## Compare the clustering using adjusted Rand index
+compare(cc$membership, gt, method = c("adjusted.rand"))
+
+```
+
+
+# Problem 2.5 (optional)
+Now try to do community deteciton on the Youtube network dataset available [here](http://snap.stanford.edu/data/com-Youtube.html) using any algorithm you want. Now try to evaluate the performance of your clustering compared to the given ground truth (it is not going to be easy :-))
+
+# Problem 3. 
+
+Download the USPS digits dataset from [here](https://cs.nyu.edu/~roweis/data.html). Next do the following steps.
+
++ Choose the digits for class $4, 7$ and $9$. 
++ Randomly sample $800$ digits from each class. 
++ Do an embedding of these $2400$ data point into $\mathbb{R}^{d}$ for some $d$, say $d = 10$, using **Laplacian eigenmaps**. You are free to choose your choice of $\epsilon$ or $k$-NN or weights.
++ Run a $3$-class SVM classifier on the embeddings for these $2400$ datapoints. Use a linear kernel for your SVM.
++ With the remaining $900$ data points ($300$ from each class), evaluate the performance of your SVM classifier on this holdout data.
++ Compare this performance with say SVM classification in the original $256$ dimension data using say a linear kernel or a Gaussian kernel.
+
+**Hint** To evaluate the performance on the hold-out data, you will need to do an out-of-sample embedding. Read [this paper](https://papers.nips.cc/paper/2461-out-of-sample-extensions-for-lle-isomap-mds-eigenmaps-and-spectral-clustering.pdf) to see how to construct an out-of-sample embedding for Laplacian eigenmaps.
+
+# Problem 4. 
+Complete the proof of Theorem 7 on page $55$ of the dimension reduction lecture slides. In particular, show that if $x_1, x_2, \dots, x_n$ are **distinct** then the matrix $\mathbf{H} = f(\|x_i - x_j\|^2)$ is positive definite.
