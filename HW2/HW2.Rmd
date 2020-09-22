@@ -22,6 +22,7 @@ library(RColorBrewer)
 library(rmatio)
 library(R.matlab)
 library(dplyr)
+set.seed(1978)
 ```
 
 ## Instruction
@@ -169,17 +170,6 @@ Now try to do community deteciton on the Youtube network dataset available [here
 
 # Problem 3. 
 
-```{r, warning=FALSE}
-usps<-readMat(file.path("usps_all.mat"))$data
-usps_sub <- usps[,,c(5,8,10)]
-
-usps_4 <- usps_sub[,,1]
-usps_7 <- usps_sub[,,2]
-usps_9 <- usps_sub[,,3]
-
-usps_4[, sample(ncol(usps_4), 1)]
-
-```
 
 Download the USPS digits dataset from [here](https://cs.nyu.edu/~rowei?s/data.html). Next do the following steps.
 
@@ -193,6 +183,34 @@ Download the USPS digits dataset from [here](https://cs.nyu.edu/~rowei?s/data.ht
 
 
 **Hint** To evaluate the performance on the hold-out data, you will need to do an out-of-sample embedding. Read [this paper](https://papers.nips.cc/paper/2461-out-of-sample-extensions-for-lle-isomap-mds-eigenmaps-and-spectral-clustering.pdf) to see how to construct an out-of-sample embedding for Laplacian eigenmaps.
+
+```{r, warning=FALSE}
+usps<-readMat(file.path("usps_all.mat"))$data
+usps_sub <- usps[,,c(4,7,9)]
+sample_size = 800
+
+usps_4 <- usps_sub[,,1]
+usps_7 <- usps_sub[,,2]
+usps_9 <- usps_sub[,,3]
+
+image(matrix(usps_7[, sample(ncol(usps_7), 1)], nrow=16))
+
+# sample data for into training and test
+sample_4 = sample(1:ncol(usps_4), sample_size)
+sample_7 = sample(1:ncol(usps_7), sample_size)
+sample_9 = sample(1:ncol(usps_9), sample_size)
+
+insample_4 = usps_4[, sample_4]
+outsample_4 = usps_4[,-sample_4]
+insample_7 = usps_7[, sample_7]
+outsample_7 = usps_4[,-sample_7]
+insample_9 = usps_9[, sample_9]
+outsample_9 = usps_4[,-sample_9]
+
+insample = cbind(insample_4, insample_7, insample_9)
+outsample = cbind(outsample_4, outsample_7, outsample_9)
+```
+
 
 # Problem 4. 
 Complete the proof of Theorem 7 on page $55$ of the dimension reduction lecture slides. In particular, show that if $x_1, x_2, \dots, x_n$ are **distinct** then the matrix $\mathbf{H} = f(\|x_i - x_j\|^2)$ is positive definite.
