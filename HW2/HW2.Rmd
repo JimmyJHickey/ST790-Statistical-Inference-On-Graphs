@@ -22,6 +22,7 @@ library(RColorBrewer)
 library(rmatio)
 library(R.matlab)
 library(dplyr)
+library(e1071)
 set.seed(1978)
 ```
 
@@ -188,10 +189,13 @@ Download the USPS digits dataset from [here](https://cs.nyu.edu/~rowei?s/data.ht
 usps<-readMat(file.path("usps_all.mat"))$data
 usps_sub <- usps[,,c(4,7,9)]
 sample_size = 800
+n_eigenvec = 10
 
 usps_4 <- usps_sub[,,1]
 usps_7 <- usps_sub[,,2]
 usps_9 <- usps_sub[,,3]
+
+holdout_size = dim(usps_4)[2] - sample_size
 
 image(matrix(usps_7[, sample(ncol(usps_7), 1)], nrow=16))
 
@@ -207,8 +211,33 @@ outsample_7 = usps_4[,-sample_7]
 insample_9 = usps_9[, sample_9]
 outsample_9 = usps_4[,-sample_9]
 
-insample = cbind(insample_4, insample_7, insample_9)
-outsample = cbind(outsample_4, outsample_7, outsample_9)
+insample = t(cbind(insample_4, insample_7, insample_9))
+outsample = t(cbind(outsample_4, outsample_7, outsample_9))
+
+inlabels = c(rep(4, sample_size), rep(7, sample_size), rep(9, sample_size))
+outlabels = c(rep(4, holdout_size ), rep(7, holdout_size ), rep(9, holdout_size ))
+
+distmat = as.matrix(dist(insample))
+quantile(distmat)
+
+# guassian kernel with bandwidth sigma^2
+sigma = 1000
+W <- exp(-distmat^2/sigma^2)
+d = rowSums(W)
+quantile(d)
+
+
+norm_laplacian <- W/outer(sqrt(d),sqrt(d)) ## Normalized Laplacian matrix
+Xhat <- eigen(norm_laplacian, symmetric = TRUE)
+
+pairs(Xhat$vectors[,1:n_eigenvec], col = rep(c(4,7,9), each = 1100))
+
+eigen = data.frame(Xhat$vectors[,1:n_eigenvec], y = as.factor(inlabels))
+svmfit = svm(y ~ ., data = eigen, kernel = "linear", cost = 10, scale = FALSE)
+plot(svmfit, eigen)
+
+fulldata = data.frame(insample, y = as.factor(inlabels))
+
 ```
 
 
