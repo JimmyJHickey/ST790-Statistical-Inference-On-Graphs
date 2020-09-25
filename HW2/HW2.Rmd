@@ -2,7 +2,7 @@
 title: "ST 790 Assignment 2"
 author: "David Elsheimer and Jimmy Hickey"
 date: "9/29/2020"
-output: pdf_document
+output: html_document
 urlcolor: blue
 
 ---
@@ -23,6 +23,7 @@ library(rmatio)
 library(R.matlab)
 library(dplyr)
 library(e1071)
+library(caret)
 set.seed(1978)
 ```
 
@@ -31,7 +32,7 @@ This assignment consists of $4$ problems. The assignment is due on
 **Tuesday, September 29** at 11:59pm EDT. Please submit your assignment electronically through the **Moodle** webpage.
 The assignment can be done as a group with at most 3 members per group (please include the name of the group members on the front page of the assignment).
 
-## Problem 1.
+# Problem 1.
 
 Let $\mathbf{D}$ be a $n \times n$ symmetric dissimilarity matrix, i.e., the
 entries $d_{ij}$ of $\mathbf{D}$ are non-negative for all $i,j$,
@@ -92,9 +93,122 @@ show that this permutation matrix will rearrange the diagonal entries of
 $\Sigma$ to coincide with the ordering of the diagonal entries of
 $\Lambda$. 
 
+___
+
+We will start by looking at the hint. 
+
+Notice that
+
+\begin{align*}
+\|\mathbf{B} - \mathbf{M}\|_{F}^2 & = \| \pmb U \pmb \Lambda \pmb U^T - \pmb V \pmb \Sigma \pmb V^T \|_{F}^2 \\
+  & =  \| \pmb U \pmb U^T (\pmb U \pmb \Lambda \pmb U^T - \pmb V \pmb \Sigma \pmb V^T) \|_{F}^2 & \text{multiply by identity} \\
+  & = \| \pmb U^T (\pmb U \pmb \Lambda \pmb U^T - \pmb V \pmb \Sigma \pmb V^T)\pmb U  \|_{F}^2 & \text{rearrange via trace} \\
+  & =  \| \pmb U^T \pmb U \pmb \Lambda \pmb U^T\pmb U -\pmb U^T  \pmb V \pmb \Sigma \pmb V^T \pmb U  \|_{F}^2 \\
+  & = \|  \pmb \Lambda  -\pmb U^T  \pmb V \pmb \Sigma \pmb V^T \pmb U  \|_{F}^2 .\\
+\end{align*}
+
+Thus, take $\pmb W = \pmb U^T \pmb V$. Notice that $\pmb W$ is orthogonal.
+
+$$
+\pmb W^T \pmb W = (\pmb U^T \pmb V)^T(\pmb U^T \pmb V) = \pmb V^T \pmb U \pmb U^T \pmb V = \pmb V^T \pmb I \pmb V = \pmb I.
+$$
+Now we want to find $\pmb W$ such that
+
+$$
+\min_{\mathbf{W}} \|\Lambda - \mathbf{W} \Sigma
+\mathbf{W}^{\top}\|_{F}^2.
+$$
+
+Recall that $\pmb \Sigma$ is the diagonal matrix of eigenvalues of $\pmb M$. Intuitively, we want $\pmb W$ to be a permutation matrix. Thus, $\pmb W \pmb \Sigma \pmb W^T$ would result in rearranged, but still diagonal, matrix with the eigenvalues of $\pmb M$ on the diagonal. Now, in order to minimize the Frobenius norm, we want to rearrange these elements in such a way that the ordering of eigenvalues matches that of $\pmb \Lambda$. For example, if 
+
+$$
+\pmb \Lambda = 
+\begin{bmatrix}
+\lambda_{(1)} & 0 & 0 & 0 \\
+0 & \lambda_{(4)} & 0 & 0 \\
+0 & 0 & \lambda_{(3)} & 0 \\
+0 & 0 & 0 & \lambda_{(2)} \\
+\end{bmatrix},
+$$
+
+then we would want 
+
+$$
+\pmb W \pmb \Sigma \pmb W^T = 
+\begin{bmatrix}
+\sigma_{(1)} & 0 & 0 & 0 \\
+0 & \sigma_{(4)} & 0 & 0 \\
+0 & 0 & \sigma_{(3)} & 0 \\
+0 & 0 & 0 & \sigma_{(2)} \\
+\end{bmatrix}.
+$$
+
+This will minimize the Frobenius norm. 
+
+Thus, we need to show that $\pmb W$ can be a permutation matrix and that the _correct_ permutation matrix will minimize the Frobenius norm.
+
+Take $\pmb V$ to be the columns of $\pmb U$ in an arbitrary order. For example,
+
+$$
+\pmb W = \pmb U^T \pmb V =
+\begin{bmatrix}
+\pmb u_1 \\ \pmb u_2 \\ \pmb u_3 \\ \pmb u_4
+\end{bmatrix} 
+\begin{bmatrix}
+\pmb u_3 & \pmb u_2 & \pmb u_4 & \pmb u_1
+\end{bmatrix} 
+=
+\begin{bmatrix}
+\pmb u_1 \cdot  \pmb u_3 & \pmb u_1 \cdot  \pmb u_2 & \pmb u_1 \cdot  \pmb u_4 & \pmb u_1 \cdot  \pmb u_1 \\
+\pmb u_2 \cdot  \pmb u_3 & \pmb u_2 \cdot  \pmb u_2 & \pmb u_2 \cdot  \pmb u_4 & \pmb u_2 \cdot  \pmb u_1 \\
+\pmb u_3 \cdot  \pmb u_3 & \pmb u_3 \cdot  \pmb u_2 & \pmb u_3 \cdot  \pmb u_4 & \pmb u_3 \cdot  \pmb u_1 \\
+\pmb u_4 \cdot  \pmb u_3 & \pmb u_4 \cdot  \pmb u_2 & \pmb u_4 \cdot  \pmb u_4 & \pmb u_4 \cdot  \pmb u_1 
+\end{bmatrix}
+$$
+However, recall that $\pmb U$ is the matrix of orthogonal eigenvectors. So,
+
+$$
+\pmb u_i \cdot \pmb u_j = \begin{cases}
+1 & i = j \\
+0 & i \neq j.
+\end{cases}
+$$
+Thus, $\pmb W$ will be a permutation matrix. In our example,
+
+$$
+\pmb W = 
+\begin{bmatrix}
+0 & 0 & 0 & 1 \\
+0 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0
+\end{bmatrix}.
+$$
+Now we need to show that the right choice of permutation (that orders the values of $\pmb \Sigma$ the same as in $\pmb \Lambda$) will minimize the Frobenius norm.
+
+Notice,
+
+\begin{align*}
+ \|\pmb \Lambda - \pmb{W} \pmb \Sigma
+\pmb{W}^{T}\|_{F}^2 & = \text{tr}\Big( (\pmb \Lambda - \pmb{W} \pmb \Sigma
+\pmb{W}^{T}) (\pmb \Lambda - \pmb{W} \pmb \Sigma
+\pmb{W}^{T})^T \Big) \\
+  & = \text{tr}\Big( \pmb \Lambda \pmb \Lambda^T - 2 \pmb \Lambda \pmb W \pmb \Sigma \pmb W^T + \pmb W \pmb \Sigma \pmb \Sigma^T \pmb W^T  \Big) \\
+  & = \text{tr}( \pmb \Lambda \pmb \Lambda^T) - 2 \text{tr}(   \pmb \Lambda \pmb W \pmb \Sigma \pmb W^T) + \text{tr}(  \pmb W \pmb \Sigma \pmb \Sigma^T \pmb W^T  ) \\
+   & = \text{tr}( \pmb \Lambda \pmb \Lambda^T) - 2 \text{tr}(   \pmb \Lambda \pmb W \pmb \Sigma \pmb W^T) + \text{tr}(  \pmb W^T \pmb W \pmb \Sigma \pmb \Sigma^T   ) \\
+    & = \text{tr}( \pmb \Lambda \pmb \Lambda^T) - 2 \text{tr}(   \pmb \Lambda \pmb W \pmb \Sigma \pmb W^T) + \text{tr}( \pmb \Sigma \pmb \Sigma   ) \\
+\end{align*}
+
+<!-- https://math.stackexchange.com/questions/3006109/proof-for-cauchy-schwarz-inequality-for-trace/3006115 -->
+
+<!-- Without loss of generatlity, assume that $\pmb \Lambda$ is already in already in descending order. Then, $\pmb W = \pmb I$, so, $\pmb V = \pmb U$. -->
+
 # Problem 2
 
 Download the dataset of games between American College Football teams available [here](http://www-personal.umich.edu/~mejn/netdata/). Now perform community detection using (1) a spectral clustering algorithm using normalized cut (2) spectral clustering using modularity and (3) Louvain algorithm. Evaluate the performance of your clustering (compared to the given ground truth).
+
+___
+
 
 ```{r, warning=FALSE}
 g<-read.graph("football.gml",format=c("gml"))
@@ -185,6 +299,8 @@ Download the USPS digits dataset from [here](https://cs.nyu.edu/~rowei?s/data.ht
 
 **Hint** To evaluate the performance on the hold-out data, you will need to do an out-of-sample embedding. Read [this paper](https://papers.nips.cc/paper/2461-out-of-sample-extensions-for-lle-isomap-mds-eigenmaps-and-spectral-clustering.pdf) to see how to construct an out-of-sample embedding for Laplacian eigenmaps.
 
+___
+
 ```{r, warning=FALSE}
 usps<-readMat(file.path("usps_all.mat"))$data
 usps_sub <- usps[,,c(4,7,9)]
@@ -196,8 +312,6 @@ usps_7 <- usps_sub[,,2]
 usps_9 <- usps_sub[,,3]
 
 holdout_size = dim(usps_4)[2] - sample_size
-
-image(matrix(usps_7[, sample(ncol(usps_7), 1)], nrow=16))
 
 # sample data for into training and test
 sample_4 = sample(1:ncol(usps_4), sample_size)
@@ -217,29 +331,56 @@ outsample = t(cbind(outsample_4, outsample_7, outsample_9))
 inlabels = c(rep(4, sample_size), rep(7, sample_size), rep(9, sample_size))
 outlabels = c(rep(4, holdout_size ), rep(7, holdout_size ), rep(9, holdout_size ))
 
-distmat = as.matrix(dist(insample))
-quantile(distmat)
 
-# guassian kernel with bandwidth sigma^2
-sigma = 1000
-W <- exp(-distmat^2/sigma^2)
-d = rowSums(W)
-quantile(d)
+eigenprocessing = function(inmat) {
+  # distance matrix
+  distmat = as.matrix(dist(insample))
+  quantile(distmat)
+  
+  # guassian kernel with bandwidth sigma^2
+  sigma = 1000
+  W <- exp(-distmat^2/sigma^2)
+  d = rowSums(W)
+  
+  
+  norm_laplacian <- W/outer(sqrt(d),sqrt(d)) ## Normalized Laplacian matrix
+  Xhat <- eigen(norm_laplacian, symmetric = TRUE)
+  
+  pairs(Xhat$vectors[,1:n_eigenvec], col = rep(c(4,7,9), each = 800))
 
+  return(Xhat$vectors)
+}
 
-norm_laplacian <- W/outer(sqrt(d),sqrt(d)) ## Normalized Laplacian matrix
-Xhat <- eigen(norm_laplacian, symmetric = TRUE)
+# insample_eigen = eigenprocessing(insample)
+# 
+# # fit eigen decomp svm
+# eigen = data.frame(insample_eigen[,1:n_eigenvec], y = as.factor(inlabels))
+# eigenfit = svm(y ~ ., data = eigen, kernel = "linear", cost = 0.1, scale = FALSE)
+# 
+# ## training
+# confusionMatrix(eigen$y, predict(eigenfit))
+# 
+# ## test
+# confusionMatrix(as.factor(outlabels),
+#                   predict(eigenfit, data.frame(outsample)))
+# 
+# 
+# # fit full data svm
+# fulldata = data.frame(insample, y = as.factor(inlabels))
+# fullfit = svm(y ~ ., data = fulldata, kernel = "linear", cost = 0.1, scale = FALSE)
+# 
+# ## training
+# confusionMatrix(fulldata$y, predict(fullfit))
+# 
+# ## test
+# confusionMatrix(as.factor(outlabels),
+#                   predict(fullfit, data.frame(outsample)))
 
-pairs(Xhat$vectors[,1:n_eigenvec], col = rep(c(4,7,9), each = 1100))
-
-eigen = data.frame(Xhat$vectors[,1:n_eigenvec], y = as.factor(inlabels))
-svmfit = svm(y ~ ., data = eigen, kernel = "linear", cost = 10, scale = FALSE)
-plot(svmfit, eigen)
-
-fulldata = data.frame(insample, y = as.factor(inlabels))
 
 ```
 
 
 # Problem 4. 
 Complete the proof of Theorem 7 on page $55$ of the dimension reduction lecture slides. In particular, show that if $x_1, x_2, \dots, x_n$ are **distinct** then the matrix $\mathbf{H} = f(\|x_i - x_j\|^2)$ is positive definite.
+
+___
