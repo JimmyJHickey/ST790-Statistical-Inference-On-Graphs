@@ -196,8 +196,17 @@ Notice,
   & = \text{tr}\Big( \pmb \Lambda \pmb \Lambda^T - 2 \pmb \Lambda \pmb W \pmb \Sigma \pmb W^T + \pmb W \pmb \Sigma \pmb \Sigma^T \pmb W^T  \Big) \\
   & = \text{tr}( \pmb \Lambda \pmb \Lambda^T) - 2 \text{tr}(   \pmb \Lambda \pmb W \pmb \Sigma \pmb W^T) + \text{tr}(  \pmb W \pmb \Sigma \pmb \Sigma^T \pmb W^T  ) \\
    & = \text{tr}( \pmb \Lambda \pmb \Lambda^T) - 2 \text{tr}(   \pmb \Lambda \pmb W \pmb \Sigma \pmb W^T) + \text{tr}(  \pmb W^T \pmb W \pmb \Sigma \pmb \Sigma^T   ) \\
-    & = \text{tr}( \pmb \Lambda \pmb \Lambda^T) - 2 \text{tr}(   \pmb \Lambda \pmb W \pmb \Sigma \pmb W^T) + \text{tr}( \pmb \Sigma \pmb \Sigma   ) \\
+    & = \text{tr}( \pmb \Lambda \pmb \Lambda) - 2 \text{tr}(   \pmb \Lambda \pmb W \pmb \Sigma \pmb W^T) + \text{tr}( \pmb \Sigma \pmb \Sigma   ) \\ \\
+\text{tr}(   \pmb \Lambda \pmb W \pmb \Sigma \pmb W^T) & \leq \sqrt{  \text{tr}(\pmb \Lambda^T \pmb \Lambda  ) \text{tr}( (\pmb W \pmb \Sigma \pmb W^T)^T(\pmb W \pmb \Sigma \pmb W^T)   ) }& \text{Cauchy-Schwartz} \\
+  & = \sqrt{  \text{tr}(\pmb \Lambda \pmb \Lambda  ) \text{tr}( \pmb W \pmb \Sigma \pmb W^T \pmb W \pmb \Sigma \pmb W^T  ) } \\
+  & = \sqrt{  \text{tr}(\pmb \Lambda \pmb \Lambda  ) \text{tr}(\pmb W^T \pmb W \pmb \Sigma \pmb W^T \pmb W \pmb \Sigma  ) } \\
+  & = \sqrt{  \text{tr}(\pmb \Lambda \pmb \Lambda  ) \text{tr} (\pmb \Sigma \pmb \Sigma  ) } & \pmb W \text{ orthogonal} \\ \\
+ \|\pmb \Lambda - \pmb{W} \pmb \Sigma
+\pmb{W}^{T}\|_{F}^2 & = \text{tr}( \pmb \Lambda \pmb \Lambda) - 2 \text{tr}(   \pmb \Lambda \pmb W \pmb \Sigma \pmb W^T) + \text{tr}( \pmb \Sigma \pmb \Sigma   ) \\
+  & \leq \text{tr}( \pmb \Lambda \pmb \Lambda) - 2\sqrt{  \text{tr}(\pmb \Lambda \pmb \Lambda  ) \text{tr} (\pmb \Sigma \pmb \Sigma  ) } + \text{tr}( \pmb \Sigma \pmb \Sigma   ) \\
 \end{align*}
+
+Notice that this is minimized if $\text{tr}( \pmb \Lambda \pmb \Lambda) = \text{tr}( \pmb \Sigma \pmb \Sigma   )$.
 
 <!-- https://math.stackexchange.com/questions/3006109/proof-for-cauchy-schwarz-inequality-for-trace/3006115 -->
 
