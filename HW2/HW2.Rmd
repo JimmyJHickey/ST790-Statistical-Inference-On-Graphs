@@ -2,7 +2,7 @@
 title: "ST 790 Assignment 2"
 author: "David Elsheimer and Jimmy Hickey"
 date: "9/29/2020"
-output: html_document
+output: pdf_document
 urlcolor: blue
 
 ---
@@ -186,22 +186,26 @@ $$
 $$
 Now we need to show that the right choice of permutation (that orders the values of $\pmb \Sigma$ the same as in $\pmb \Lambda$) will minimize the Frobenius norm.
 
-Notice,
+We can to this by reframing our question. Minimizing our Frobenius norm is equivalent to 
+
+$$
+\max_{\pmb W} \text{tr}\Big(W \Sigma W^T \Lambda \Big) = \sum_i \sum_j w_{ij}^2 \lambda_i \sigma_j.
+$$
+
+We can rewrite this once more. Take $h_{ij} = w_{ij}^2$.
 
 \begin{align*}
- \|\pmb \Lambda - \pmb{W} \pmb \Sigma
-\pmb{W}^{T}\|_{F}^2 & = \text{tr}\Big( (\pmb \Lambda - \pmb{W} \pmb \Sigma
-\pmb{W}^{T}) (\pmb \Lambda - \pmb{W} \pmb \Sigma
-\pmb{W}^{T})^T \Big) \\
-  & = \text{tr}\Big( \pmb \Lambda \pmb \Lambda^T - 2 \pmb \Lambda \pmb W \pmb \Sigma \pmb W^T + \pmb W \pmb \Sigma \pmb \Sigma^T \pmb W^T  \Big) \\
-  & = \text{tr}( \pmb \Lambda \pmb \Lambda^T) - 2 \text{tr}(   \pmb \Lambda \pmb W \pmb \Sigma \pmb W^T) + \text{tr}(  \pmb W \pmb \Sigma \pmb \Sigma^T \pmb W^T  ) \\
-   & = \text{tr}( \pmb \Lambda \pmb \Lambda^T) - 2 \text{tr}(   \pmb \Lambda \pmb W \pmb \Sigma \pmb W^T) + \text{tr}(  \pmb W^T \pmb W \pmb \Sigma \pmb \Sigma^T   ) \\
-    & = \text{tr}( \pmb \Lambda \pmb \Lambda^T) - 2 \text{tr}(   \pmb \Lambda \pmb W \pmb \Sigma \pmb W^T) + \text{tr}( \pmb \Sigma \pmb \Sigma   ) \\
+\sum_i \sum_j & h_{ij} \lambda_i \sigma_j \\
+\text{subject to }  \sum_i h_{ij} & = \sum_j h_{ij} = 1
 \end{align*}
 
-<!-- https://math.stackexchange.com/questions/3006109/proof-for-cauchy-schwarz-inequality-for-trace/3006115 -->
+The constraint can be written in this form because $W$ is orthogonal. Since $W W^T = I$, we get $\sum_j w_{ij}^2 = 1$ for all $i$. Similarly, since $W^T W = I$ we get $\sum_i w_{ij}^2 = 1$ for all $j$.
 
-<!-- Without loss of generatlity, assume that $\pmb \Lambda$ is already in already in descending order. Then, $\pmb W = \pmb I$, so, $\pmb V = \pmb U$. -->
+This is a linear programming question with the constraint $\sum_i h_{ij} = \sum_j h_{ij} = 1$. We know that for a linear programming question, the solution exists on the boundary of the feasible set. Further, the Birkhoof-von Neumann Theorem states that the boundary of this constraint (the set of doubly stochastic matrices) is the set of $n \times n$ permutation matrices.  Thus, a permutation matrix will minimize our objective.
+
+Further, the rearrangement inequality states that the maximum reorderring will match the order of $\lambda_i$ and $\sigma_j$ in our rewritten objective.
+
+Our proposition is an application of this result. We want the best rank $r$ approximation of $B$. To obtain this, we can use $W$ to strip off the smallest $n-r$ eigenvalues of $B$ to maximize the Frobenius norm.
 
 # Problem 2
 
