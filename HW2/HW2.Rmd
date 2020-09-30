@@ -473,8 +473,6 @@ $$
 
 The first column of $\mathbf{V}$ is trivial, as this is also one of $\mathcal{S}$. $\mathbf{z} = \mathbf{B}\boldsymbol{\pi}$. For columns $\mathbf{B}_1, \dots, \mathbf{B}_n, \mathbf{z} = \pi_1\mathbf{B}_1 + \cdots + \pi_n\mathbf{B}_n$. This is a linear combination of columns of $\mathcal{S}$.
 
-$\mathbf{z}^2 = \mathbf{z}\ast \mathbf{z} = \mathbf{B}\boldsymbol{\pi}\ast \mathbf{B}\boldsymbol{\pi}$.
-
-
+Note that for an element of $\mathbf{z}_i$, it can be expressed as $\mathbf{z}_i = \displaystyle\sum_kB_{ik}\pi_k\sum_{\ell}B_{i\ell}\pi_\ell = \sum_{(k,\ell)}B_{ik}B_{i\ell}\pi_k\pi_\ell$. Consider the structure of the Hadamard product of $\mathbf{B}$ with itself, $\mathbf{B}\ast\mathbf{B}$. A given row of this matrix will consist of the $n$ $B_{ik}^2$ elements for $1 \leq k \leq n$, as well as the $n(n-1)$ elements $B_{ik}B_{i\ell}$ for $\ell \neq k$. As such, if we consider the vector $\pi^{(2)}$ is of length $n^2$, and contains all combinations of $\pi_k\pi_\ell$. Note then that a linear combination of the columns of $\mathcal{S}$, $\mathbf{B}^{\ast(2)}\boldsymbol{\pi}^{(2)} = \mathbf{z}^2$. This can this be generalized to $n-1$ case by considering the linear combination of elements in $\mathcal{S}$ $\mathbf{B}^{\ast(n-1)}\boldsymbol{\pi}^{(n-1)}$, where $\boldsymbol{\pi}^{(n-1)}$ is defined in a similar way as previously.
 
 As $\text{det}(\mathbf{V}) > 0$, the columns in $\mathcal{S}$ contains n linearly independent columns as desired. As this has been shown, $(e^{m_{ij}})$ is positive definite, which completes the claim equivalent to the one we are trying to prove.
