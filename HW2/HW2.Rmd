@@ -93,7 +93,7 @@ show that this permutation matrix will rearrange the diagonal entries of
 $\Sigma$ to coincide with the ordering of the diagonal entries of
 $\Lambda$. 
 
-___
+
 
 We will start by looking at the hint. 
 
@@ -211,7 +211,7 @@ Our proposition is an application of this result. We want the best rank $r$ appr
 
 Download the dataset of games between American College Football teams available [here](http://www-personal.umich.edu/~mejn/netdata/). Now perform community detection using (1) a spectral clustering algorithm using normalized cut (2) spectral clustering using modularity and (3) Louvain algorithm. Evaluate the performance of your clustering (compared to the given ground truth).
 
-___
+
 
 
 ```{r, warning=FALSE}
@@ -303,7 +303,6 @@ Download the USPS digits dataset from [here](https://cs.nyu.edu/~rowei?s/data.ht
 
 **Hint** To evaluate the performance on the hold-out data, you will need to do an out-of-sample embedding. Read [this paper](https://papers.nips.cc/paper/2461-out-of-sample-extensions-for-lle-isomap-mds-eigenmaps-and-spectral-clustering.pdf) to see how to construct an out-of-sample embedding for Laplacian eigenmaps.
 
-___
 
 ```{r, warning=FALSE}
 usps<-readMat(file.path("usps_all.mat"))$data
@@ -430,4 +429,52 @@ confusionMatrix(as.factor(outlabels),
 # Problem 4. 
 Complete the proof of Theorem 7 on page $55$ of the dimension reduction lecture slides. In particular, show that if $x_1, x_2, \dots, x_n$ are **distinct** then the matrix $\mathbf{H} = f(\|x_i - x_j\|^2)$ is positive definite.
 
-___
+**Answer**
+
+As per the notes, showing this claim is equivalent to showing the following claim:
+
+Let $\mathbf{M} = (m_{ij})$ be a $n\times n$ .s.d. matrix with distinct rows. Then $(e^{m_{ij}})$ is positive definite.
+
+Some of this proof is already laid out in the notes, and will be restated below. The key parts which require more rigor will be covered in detail.
+
+As $\mathbf{M}$ is p.s.d., $\mathbf{M} = \mathbf{BB}^{\top}$ for some $n\times n$ matrix $\mathbf{B}$. Note that 
+
+$$
+\mathbf{M}^{(2)} = (\mathbf{BB}^\top)\circ (\mathbf{BB}^\top) = (\mathbf{B}\ast \mathbf{B})(\mathbf{B}\ast \mathbf{B})^{\top}
+$$
+Here, for $\mathbf{X}_{n \times p}, \mathbf{Y}_{n\times q}, \mathbf{X}\ast \mathbf{Y}$ is the $n\times pq$ matrix obtained by taking the Hadamard product of every column of $\mathbf{X}$ with each column of $\mathbf{Y}$.
+
+Going further, for each integer $k \geq 1$, $\mathbf{B}^{\ast(k)} = \mathbf{B}\ast\mathbf{B}\ast\dots\ast\mathbf{B}$ k times. As such, $\mathbf{M}^{(k)} = (\mathbf{B}^{\ast(k)})(\mathbf{B}^{\ast(k)})^{\top}$. Because
+
+$$
+(e^{m_{ij}}) = 11^\top + \mathbf{B}\mathbf{B}^{\top} + \frac{1}{2!}\mathbf{B}^{\ast(2)}(\mathbf{B}^{\ast(2)})^\top +\frac{1}{3!}\mathbf{B}^{\ast(3)}(\mathbf{B}^{\ast(3)})^\top + \cdots
+$$
+
+it is therefore sufficient to show that the collection of column vectors of the infinite series of matrices $\mathcal{S} = \{1, \mathbf{B}, \mathbf{B}^{\ast(2)},\dots\}$ has n linearly independent columns.
+
+As $\mathbf{M}$ has distinct rows and columns, $\mathbf{B}$ also has distinct rows. We want to show that if $\mathbf{B}$ has distinct rows, there exists some vector $\boldsymbol{\pi}$ such that $\mathbf{z} = \mathbf{B}\boldsymbol{\pi}$.
+
+Consider for the sake of contradiction that $\mathbf{B}$ has distinct rows, but that there does not exist a $\boldsymbol{\pi}$ such that $\mathbf{z} = \mathbf{B}\boldsymbol{\pi}$ has distinct elements.
+
+Then $\mathbf{B}\boldsymbol{\pi} = \begin{bmatrix}\displaystyle\sum_{j=1}^nB_{1j}\pi_j \\ \vdots \\ \sum_{j=1}^nB_{nj}\pi_j\end{bmatrix}$ such that $\displaystyle\sum_{j=1}^nB_{1j}\pi_j = \cdots = \displaystyle\sum_{j=1}^nB_{nj}\pi_j$. This is equivalent to stating that for all $j, B_{1j} = \cdots = B_{nj}$. This means that the rows are not distinct, a contradiction.
+
+Next, consider the $n\times n$ Vandermonde matrix $\mathbf{V} = (v_{ij})$ such that $v_{ij} = z_i^{j-1}$. This matrix is non-singular.
+
+Next we want to demonstrate that $\text{det}(\mathbf{V})$ being a multilinear function of the columns of $\mathbf{V}$ implies that $\mathcal{S}$. has $n$ linearly independent columns. This can be shown by showing that any column of $\mathbf{V}$ can be written as linear combinations of some column of $\mathcal{S}$. 
+
+Note that 
+$$
+\mathbf{V} = \left[
+\begin{array}{c|c|c|c|c}
+1 & \mathbf{z}&\mathbf{z}^2&\cdots&\mathbf{z}^{n-1} \\
+\end{array}
+\right]
+$$
+
+The first column of $\mathbf{V}$ is trivial, as this is also one of $\mathcal{S}$. $\mathbf{z} = \mathbf{B}\boldsymbol{\pi}$. For columns $\mathbf{B}_1, \dots, \mathbf{B}_n, \mathbf{z} = \pi_1\mathbf{B}_1 + \cdots + \pi_n\mathbf{B}_n$. This is a linear combination of columns of $\mathcal{S}$.
+
+$\mathbf{z}^2 = \mathbf{z}\ast \mathbf{z} = \mathbf{B}\boldsymbol{\pi}\ast \mathbf{B}\boldsymbol{\pi}$.
+
+
+
+As $\text{det}(\mathbf{V}) > 0$, the columns in $\mathcal{S}$ contains n linearly independent columns as desired. As this has been shown, $(e^{m_{ij}})$ is positive definite, which completes the claim equivalent to the one we are trying to prove.
