@@ -399,13 +399,19 @@ eigen = data.frame(in_vecs, y = as.factor(inlabels))
 eigenfit = svm(y ~ ., data = eigen, kernel = "linear", cost = 0.1, scale = FALSE)
 
 ## training
+cat("---------------\n
+training: 10 eigenvalues\n
+---------------")
 confusionMatrix(eigen$y, predict(eigenfit))
 
 ## test
 outembed = data.frame(out_embedding(new_data = outsample, full_data = insample, eigen_vals = in_vals, eigen_vecs = in_vecs))
 
-
 colnames(outembed) = c("X1", "X2", "X3", "X4", "X5", "X6", "X7", "X8", "X9", "X10")
+
+cat("---------------\n
+test: embedding\n
+---------------")
 
 confusionMatrix(as.factor(outlabels),
                   predict(eigenfit, outembed))
@@ -415,10 +421,15 @@ fulldata = data.frame(insample, y = as.factor(inlabels))
 fullfit = svm(y ~ ., data = fulldata, kernel = "linear", cost = 0.1, scale = FALSE)
 
 ## training
+cat("---------------\n
+training: full training data\n
+---------------")
 confusionMatrix(fulldata$y, predict(fullfit))
-# 100 percent accuracy
 
 ## test
+cat("---------------\n
+test: full training data\n
+---------------")
 confusionMatrix(as.factor(outlabels),
                   predict(fullfit, data.frame(outsample)))
 # 33% accuracy
@@ -442,6 +453,40 @@ As $\mathbf{M}$ is p.s.d., $\mathbf{M} = \mathbf{BB}^{\top}$ for some $n\times n
 $$
 \mathbf{M}^{(2)} = (\mathbf{BB}^\top)\circ (\mathbf{BB}^\top) = (\mathbf{B}\ast \mathbf{B})(\mathbf{B}\ast \mathbf{B})^{\top}
 $$
+Here, for $\mathbf{X}_{n \times p}, \mathbf{Y}_{n\times q}, \mathbf{X}\ast \mathbf{Y}$ is the $n\times pq$ matrix obtained by taking the Hadamard product of every column of $\mathbf{X}$ with each column of $\mathbf{Y}$.
+
+Going further, for each integer $k \geq 1$, $\mathbf{B}^{\ast(k)} = \mathbf{B}\ast\mathbf{B}\ast\dots\ast\mathbf{B}$ k times. As such, $\mathbf{M}^{(k)} = (\mathbf{B}^{\ast(k)})(\mathbf{B}^{\ast(k)})^{\top}$. Because
+
+$$
+(e^{m_{ij}}) = 11^\top + \mathbf{B}\mathbf{B}^{\top} + \frac{1}{2!}\mathbf{B}^{\ast(2)}(\mathbf{B}^{\ast(2)})^\top +\frac{1}{3!}\mathbf{B}^{\ast(3)}(\mathbf{B}^{\ast(3)})^\top + \cdots
+$$
+
+it is therefore sufficient to show that the collection of column vectors of the infinite series of matrices $\mathcal{S} = \{1, \mathbf{B}, \mathbf{B}^{\ast(2)},\dots\}$ has n linearly independent columns.
+
+As $\mathbf{M}$ has distinct rows and columns, $\mathbf{B}$ also has distinct rows. We want to show that if $\mathbf{B}$ has distinct rows, there exists some vector $\boldsymbol{\pi}$ such that $\mathbf{z} = \mathbf{B}\boldsymbol{\pi}$.
+
+Consider for the sake of contradiction that $\mathbf{B}$ has distinct rows, but that there does not exist a $\boldsymbol{\pi}$ such that $\mathbf{z} = \mathbf{B}\boldsymbol{\pi}$ has distinct elements.
+
+Then $\mathbf{B}\boldsymbol{\pi} = \begin{bmatrix}\displaystyle\sum_{j=1}^nB_{1j}\pi_j \\ \vdots \\ \sum_{j=1}^nB_{nj}\pi_j\end{bmatrix}$ such that $\displaystyle\sum_{j=1}^nB_{1j}\pi_j = \cdots = \displaystyle\sum_{j=1}^nB_{nj}\pi_j$. This is equivalent to stating that for all $j, B_{1j} = \cdots = B_{nj}$. This means that the rows are not distinct, a contradiction.
+
+Next, consider the $n\times n$ Vandermonde matrix $\mathbf{V} = (v_{ij})$ such that $v_{ij} = z_i^{j-1}$. This matrix is non-singular.
+
+Next we want to demonstrate that $\text{det}(\mathbf{V})$ being a multilinear function of the columns of $\mathbf{V}$ implies that $\mathcal{S}$. has $n$ linearly independent columns. This can be shown by showing that any column of $\mathbf{V}$ can be written as linear combinations of some column of $\mathcal{S}$. 
+
+Note that 
+$$
+\mathbf{V} = \left[
+\begin{array}{c|c|c|c|c}
+1 & \mathbf{z}&\mathbf{z}^2&\cdots&\mathbf{z}^{n-1} \\
+\end{array}
+\right]
+$$
+
+The first column of $\mathbf{V}$ is trivial, as this is also one of $\mathcal{S}$. $\mathbf{z} = \mathbf{B}\boldsymbol{\pi}$. For columns $\mathbf{B}_1, \dots, \mathbf{B}_n, \mathbf{z} = \pi_1\mathbf{B}_1 + \cdots + \pi_n\mathbf{B}_n$. This is a linear combination of columns of $\mathcal{S}$.
+
+Note that for an element of $\mathbf{z}_i$, it can be expressed as $\mathbf{z}_i = \displaystyle\sum_kB_{ik}\pi_k\sum_{\ell}B_{i\ell}\pi_\ell = \sum_{(k,\ell)}B_{ik}B_{i\ell}\pi_k\pi_\ell$. Consider the structure of the Hadamard product of $\mathbf{B}$ with itself, $\mathbf{B}\ast\mathbf{B}$. A given row of this matrix will consist of the $n$ $B_{ik}^2$ elements for $1 \leq k \leq n$, as well as the $n(n-1)$ elements $B_{ik}B_{i\ell}$ for $\ell \neq k$. As such, if we consider the vector $\pi^{(2)}$ is of length $n^2$, and contains all combinations of $\pi_k\pi_\ell$. Note then that a linear combination of the columns of $\mathcal{S}$, $\mathbf{B}^{\ast(2)}\boldsymbol{\pi}^{(2)} = \mathbf{z}^2$. This can this be generalized to $n-1$ case by considering the linear combination of elements in $\mathcal{S}$ $\mathbf{B}^{\ast(n-1)}\boldsymbol{\pi}^{(n-1)}$, where $\boldsymbol{\pi}^{(n-1)}$ is defined in a similar way as previously.
+
+As $\text{det}(\mathbf{V}) > 0$, the columns in $\mathcal{S}$ contains n linearly independent columns as desired. As this has been shown, $(e^{m_{ij}})$ is positive definite, which completes the claim equivalent to the one we are trying to prove.
 Here, for $\mathbf{X}_{n \times p}, \mathbf{Y}_{n\times q}, \mathbf{X}\ast \mathbf{Y}$ is the $n\times pq$ matrix obtained by taking the Hadamard product of every column of $\mathbf{X}$ with each column of $\mathbf{Y}$.
 
 Going further, for each integer $k \geq 1$, $\mathbf{B}^{\ast(k)} = \mathbf{B}\ast\mathbf{B}\ast\dots\ast\mathbf{B}$ k times. As such, $\mathbf{M}^{(k)} = (\mathbf{B}^{\ast(k)})(\mathbf{B}^{\ast(k)})^{\top}$. Because
