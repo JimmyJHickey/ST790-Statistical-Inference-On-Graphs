@@ -338,9 +338,7 @@ outlabels = c(rep(4, holdout_size ), rep(7, holdout_size ), rep(9, holdout_size 
 
 eigenprocessing = function(inmat) {
   # distance matrix
-  distmat = as.matrix(dist(insample))
-  quantile(distmat)
-  
+  distmat = as.matrix(dist(inmat))
   # guassian kernel with bandwidth sigma^2
   sigma = 1000
   W <- exp(-distmat^2/sigma^2)
@@ -350,36 +348,81 @@ eigenprocessing = function(inmat) {
   norm_laplacian <- W/outer(sqrt(d),sqrt(d)) ## Normalized Laplacian matrix
   Xhat <- eigen(norm_laplacian, symmetric = TRUE)
   
-  pairs(Xhat$vectors[,1:n_eigenvec], col = rep(c(4,7,9), each = 800))
+  # pairs(Xhat$vectors[,1:n_eigenvec], col = rep(c(4,7,9), each = 800))
 
-  return(Xhat$vectors)
+  return(Xhat)
 }
 
-# insample_eigen = eigenprocessing(insample)
-# 
-# # fit eigen decomp svm
-# eigen = data.frame(insample_eigen[,1:n_eigenvec], y = as.factor(inlabels))
-# eigenfit = svm(y ~ ., data = eigen, kernel = "linear", cost = 0.1, scale = FALSE)
-# 
-# ## training
-# confusionMatrix(eigen$y, predict(eigenfit))
-# 
-# ## test
-# confusionMatrix(as.factor(outlabels),
-#                   predict(eigenfit, data.frame(outsample)))
-# 
-# 
-# # fit full data svm
-# fulldata = data.frame(insample, y = as.factor(inlabels))
-# fullfit = svm(y ~ ., data = fulldata, kernel = "linear", cost = 0.1, scale = FALSE)
-# 
-# ## training
-# confusionMatrix(fulldata$y, predict(fullfit))
-# 
-# ## test
-# confusionMatrix(as.factor(outlabels),
-#                   predict(fullfit, data.frame(outsample)))
+# implementing equation 11 from the paper
+out_embedding = function(new_data, full_data, eigen_vals, eigen_vecs)
+{
+  
+  embedded = matrix(data = NA, nrow = dim(new_data)[1], ncol = length(eigen_vals))
+  
+  for( j in 1:dim(new_data)[1] )
+  {
+    y= rep(NA, length(eigen_vals))
+    
+    sigma=1000
+  
+    distmat = as.matrix(dist(rbind(new_data[j, ], full_data)))
+    ktilde = exp(-distmat^2/sigma^2)
+    d = rowSums(ktilde)
+    norm_laplacian <- ktilde/outer(sqrt(d),sqrt(d))
+  
+    
+    
+    for(k in 1:length(y))
+    {
+      
+      sum_val = 0
+      for(i in 1:dim(full_data)[1])
+      {
+        sum_val = sum_val + eigen_vecs[i,k] * norm_laplacian[1,i]
+      }
+      
+      y[k] = 1 / eigen_vals[k] * sum_val
+      
+    }
+    
+    embedded[j,] = y
+  }
+    
+  return(embedded)
+}
 
+insample_eigen = eigenprocessing(insample)
+in_vecs = insample_eigen$vectors[,1:n_eigenvec]
+in_vals = insample_eigen$values[1:n_eigenvec]
+
+# fit eigen decomp svm
+eigen = data.frame(in_vecs, y = as.factor(inlabels))
+eigenfit = svm(y ~ ., data = eigen, kernel = "linear", cost = 0.1, scale = FALSE)
+
+## training
+confusionMatrix(eigen$y, predict(eigenfit))
+
+## test
+outembed = data.frame(out_embedding(new_data = outsample, full_data = insample, eigen_vals = in_vals, eigen_vecs = in_vecs))
+
+
+colnames(outembed) = c("X1", "X2", "X3", "X4", "X5", "X6", "X7", "X8", "X9", "X10")
+
+confusionMatrix(as.factor(outlabels),
+                  predict(eigenfit, outembed))
+
+# fit full data svm
+fulldata = data.frame(insample, y = as.factor(inlabels))
+fullfit = svm(y ~ ., data = fulldata, kernel = "linear", cost = 0.1, scale = FALSE)
+
+## training
+confusionMatrix(fulldata$y, predict(fullfit))
+# 100 percent accuracy
+
+## test
+confusionMatrix(as.factor(outlabels),
+                  predict(fullfit, data.frame(outsample)))
+# 33% accuracy
 
 ```
 
