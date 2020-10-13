@@ -54,7 +54,7 @@ P(\Bigl\|\sum_{i=1}^{n} H_i\Bigr\| > t) & \leq e^{-st}E(\exp (s\lambda_{max}(Z_n
 & = e^{-st}E(E(\text{tr } \exp\left(\sum_{i=1}^{n-1}s H_i + sH_n\right)|\{H_i\}_{i=1}^{n-1}))\\
 & \leq e^{-st}E(\text{tr } \exp\left(\sum_{i=1}^{n-1}s H_i\right) + \log E(e^{s H_n}))\\
 & \leq \cdots\\
-& \leq e^{-st}\text{tr } \exp\left(\sum_{i=1}^{1} \log E(e^{s H_i}) \right), \ [\text{Via corollary 13.}]\\
+& \leq e^{-st}\text{tr } \exp\left(\sum_{i=1}^{n} \log E(e^{s H_i}) \right), \ [\text{Via corollary 13.}]\\
 & \leq e^{-st}\text{tr }\exp\left(\sum_{i=1}^n \frac{s^2/2}{1-|s|M/3} E(H_i^2)\right), \ [\text{Via Proposition 14.}]\\
 & \leq (d_1+d_2)e^{-st}\lambda_{max}\left(\exp(\frac{s^2/2}{1-|s|M/3}\sum_{i=1}^n  E(H_i^2))\right), \ [\text{Via Golden-Thompson.}]\\
 & \leq (d_1+d_2)e^{-st}\exp\left(\frac{s^2/2}{1-|s|M/3}\sum_{i=1}^n  \lambda_{max}(E(H_i^2))\right)\\
@@ -89,6 +89,63 @@ Next apply the above result to derive a tail bound for the following (weighted) 
 a $n \times n$ symmetric matrix with non-negative, finite entries $p_{ij}$ . Let A be a $n \times n$ symmetric matrix whose entries $a_{ij}$ for $i \leq j$ are independent and that $a_{ij} \sim \mathrm{Pois}(p_{ij})$. 
 Sketch a tail bound for $\|A - P\|$ similar in flavor to Theorem $12$ in the set of lecture notes for matrix concentration inequalities. (You don’t have to pay too much attention to constant
 factors; we are only interested in important quantities similar to the $\sqrt{\Delta \log n}$ in the statement of Theorem $12$ there).
+
+**Answer:**
+
+The first portion of this problem requires a proof follows similarly to the proof for theorem 11, with some minor adjustments. However, to avoid any confusion from skipping steps, the full proof of this portion is provided. Note $Z_n = \displaystyle \sum_{i=1}^n X_i$, $E(X_i^2) = A_i^2$.
+
+\begin{align*}
+P(\Bigl\|\sum_{i=1}^{n} X_i\Bigr\| > t) & \leq e^{-st}E(\exp (s\lambda_{max}(Z_n)))\\
+&\leq e^{-st}E(\text{tr }(\exp(\sum_{i=1}^n s X_i)))\\
+& = e^{-st}E(E(\text{tr } \exp\left(\sum_{i=1}^{n-1}s X_i + sX_n\right)|\{X_i\}_{i=1}^{n-1}))\\
+& \leq e^{-st}E(\text{tr } \exp\left(\sum_{i=1}^{n-1}s X_i\right) + \log E(e^{s X_n}))\\
+& \leq \cdots\\
+& \leq e^{-st}\text{tr } \exp\left(\sum_{i=1}^{n} \log E(e^{s X_i}) \right), \ [\text{Via corollary 13.}]\\
+& \leq e^{-st}\text{tr }\exp\left(\sum_{i=1}^n \frac{s^2/2}{1-|s|M/3} E(X_i^2)\right), \ [\text{Via Proposition 14.}]\\
+& \leq de^{-st}\lambda_{max}\left(\exp(\frac{s^2/2}{1-|s|M/3}\sum_{i=1}^n  E(X_i^2))\right), \ [\text{Via Golden-Thompson.}]\\
+& \leq de^{-st}\exp\left(\frac{s^2/2}{1-|s|M/3}\sum_{i=1}^n  \lambda_{max}(E(X_i^2))\right)\\
+& = de^{-st}\exp\left(\frac{s^2/2}{1-|s|M/3} \Bigl\|\sum_{i=1}^n A_i^2\Bigr\|\right)\\
+& = de^{-st}\exp\left(\frac{\sigma^2s^2/2}{1-|s|M/3} \right)\\
+\end{align*}
+
+For $s = \frac{t/2}{\sigma^2+R t}$, where $R = M/3$, the theorem holds for the above bound.
+
+Thus for independent matrices $X_i$ with dimension $d\times d$, $P(\Bigl\|\sum_{i=1}^{n} X_i\Bigr\| > t) \leq 2d\exp(\frac{-t^2/2}{\sigma^2 + Rt})$.
+
+Using this result, the second part of the problem involves finding a bound for the weighted graph model as defined in the problem. Note the following:
+
+$$
+\zeta_{ij} = \begin{cases} 
+      e_ie_j^\top + e_je_i^\top & i\neq j\\
+      e_ie_i^\top & i = j\\
+   \end{cases}
+$$
+For $\zeta_{ij}, e_1, \dots, e_n$ are the basic vectors of $\mathbb{R}^n$.
+
+Note $A-P = \displaystyle\sum_{i\leq j}(a_{ij}-p_{ij})\zeta_{ij}$. Let $X_{ij}=(a_{ij}-p_{ij})\zeta_{ij}$.
+
+Then $P(\Bigl\|A-P\Bigr\|  \geq t) \leq 2n \exp\left(\frac{-t^2/2}{\sigma^2 + Rt}\right)$.
+
+\begin{align*}
+\sigma^2 & =  \Bigl\|E(X_{ij}^2)\Bigr\|\\
+& = p_{ij}\zeta_{ij}^2\\
+\sum_{i\leq j}E(X_{ij}^2) & = \sum_{i=1}^n\sum_{j=1}^np_{ij}e_ie_i^\top\\
+\sigma^2 &=\underset{i}{\max}\sum_{j}p_{ij} = \Delta\\
+P(\Bigl\|A-P\Bigr\|  \geq t) &\leq 2n \exp\left(\frac{-t^2/2}{\sigma^2 + Rt}\right)\\
+& = 2n \exp\left(\frac{-t^2}{2\sigma^2 + 2Rt}\right)
+\end{align*}
+
+Let $c>0$, assume $\eta \in [n^{-c},1/2]$. Then there exists $C$ independent from $n, P$ such that for $\Delta > C\log n, RT = 2\sqrt{\Delta \log(2n/\eta)} < \Delta$. Then,
+
+
+\begin{align*}
+P(\Bigl\|A-P\Bigr\|  \geq t) &\leq 2n \exp\left(\frac{-t^2}{2\Delta + 2\Delta}\right)\\
+&\leq 2n \exp\left(\frac{-t^2}{4\Delta}\right)\\
+&= 2n\exp(-\log(2n\eta))\\
+&=\eta
+\end{align*}
+
+Thus $\eta$ is a bound for $P(\Bigl\|A-P\Bigr\|  \geq t).$
 
 # Problem 3
 Sketch a proof for the weak recovery of SBMs for the spectral clustering using the normalized Laplacian. In particular, consider the algorithm on page $1881$ of [Rohe et al.](https://projecteuclid.org/download/pdfview_1/euclid.aos/1314190618). Note that you do not need to use the eigenvectors associated with the largest $k$ eigenvalues (in modulus), but rather the eigenvectors associated with the $d$ largest eigenvalues where $d = \mathrm{rk}(\mathbf{B})$ which is assumed known.
