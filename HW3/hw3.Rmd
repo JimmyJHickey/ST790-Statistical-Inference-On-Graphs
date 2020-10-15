@@ -147,6 +147,9 @@ P(\Bigl\|A-P\Bigr\|  \geq t) &\leq 2n \exp\left(\frac{-t^2}{2\Delta + 2\Delta}\r
 
 Thus $\eta$ is a bound for $P(\Bigl\|A-P\Bigr\|  \geq t).$
 
+
+\newpage
+
 # Problem 3
 Sketch a proof for the weak recovery of SBMs for the spectral clustering using the normalized Laplacian. In particular, consider the algorithm on page $1881$ of [Rohe et al.](https://projecteuclid.org/download/pdfview_1/euclid.aos/1314190618). Note that you do not need to use the eigenvectors associated with the largest $k$ eigenvalues (in modulus), but rather the eigenvectors associated with the $d$ largest eigenvalues where $d = \mathrm{rk}(\mathbf{B})$ which is assumed known.
 
@@ -154,8 +157,131 @@ In particular, proceed as follows
 
 + Relate the eigenvectors of $\mathcal{L}(\mathbf{P}) = \mathbf{T}^{-1/2} \mathbf{P} \mathbf{T}^{-1/2}$ to the block structures. Here $\mathbf{T}$ is a diagonal matrix with $T_{ii} = \sum_{j} p_{ij}$ is the **expected degree** of vertex $i$.
 
-+ Next invoke matrix concentration inequality for $\|\mathcal{L}(\mathbf{A}) - \mathcal{L}(\mathbf{P})$.
++ Next invoke matrix concentration inequality for $\|\mathcal{L}(\mathbf{A}) - \mathcal{L}(\mathbf{P}) \|$.
 
 + Then invoke the Davis-Kahan theorem to bound the difference between the top eigenvectors of $\mathcal{L}(\mathbf{A})$ and the top eigenvectors of $\mathcal{L}(\mathbf{P})$.
 
 + Finally, show that the above difference yield that the **proportion** of mis-clustered vertices (assuming clustering is done via $K$-means)  will converges to $0$.
+
+**Answer:**
+We will **very** closely follow the "Implication for our spectral clustering story" from the notes which shows theorem 4 for weak recvover of SBMs.
+
+
+Take $A \sim SBM(B, \tau)$. Then our normalized Laplacian is $\mathcal L (A) = D^{-1/2} A D^{-1/2}$. Here $D$ is the diagonal matrix with $D_{ii} = \sum_{j} w_{ij}$ where $w_{ij}$ is the edge weight between vertex $i$ and vertex $j$.  Notice that $T$ is the diagonal matrix with th expected degrees as diagonal entries. That is, $E(D_{ii} = T_{ii})$. 
+
+Further take $Z$ to be the $n \times K$ matrix such that $Z_{ik} = I( \tau(i) = k)$. Then we define $P = Z B Z^T$. Then, $\mathcal L (P) = T^{-1/2} P T^{-1/2}$. 
+
+
+We can order our eigenvalues similar to as we did in the notes. Let $| \widehat \lambda_1 |  \geq |\widehat \lambda _2 | \geq \dots$ be the eigenvalues of $\mathcal L (A)$ in decreasing modulus. Similarly take $|\lambda_1| \geq |\lambda_2| \geq \dots$ to be the eigenvalues of $\mathcal L(P)$ in decreasing modulus. Here $\lambda_s(P) = 0$ for $s > d = \text{rank}( \mathcal L(P) )$. 
+
+Let us definte the sets $S_1 = \{ \widehat \lambda_j : j \geq d+1\}$ and $S_2 = \{\lambda_j : 1 \leq j \leq d \}$. Now we can apply Weyl's inequality to say
+
+$$
+\max_{j} | \lambda_j - \widehat \lambda_j | \leq \| \mathcal L(A) - \mathcal L(P) \| \Rightarrow | \widehat \lambda_h |  \leq \| \mathcal L(A) - \mathcal L(P) \| \text{ for all } j \geq d+1.
+$$
+
+
+Let's take $\widehat U$ and $U$ to be the matrices whose columns are the top $d$ eigenvectors of $\mathcal L(A)$ and $\mathcal L(P)$ respectively. Take $\lambda_* = \min \{ |\lambda | : \lambda \in S_2 \}$. Now suppose $\lambda_* > \|\mathcal L(A) - \mathcal L(P) \|$. We can apply the Davis-Kahan Theorem to say
+
+$$
+\min_{W \in \mathcal O(p)} \| \widehat U W - U \|_F \leq \frac{ \sqrt{2d} \| \mathcal L(A) - \mathcal L(P) \| }{  \lambda_* - \| \mathcal L(A) - \mathcal L(P) \|}.
+$$
+
+We will proceed by bounding $\lambda_*$.
+
+Let's look a general eigenvector $v$ of $\mathcal L(P)$ with eigenvalue $\lambda$. We want to relate these eigenvalues to eigenvalues of a function of the block structure, $B$.
+
+\begin{align*}
+\ell (P) v & = \lambda v \\
+T^{-1/2} P T^{-1/2} v & = \lambda v \\
+T^{-1/2} (Z B Z^T) T^{-1/2} v & = \lambda v \\
+BZT^{-1/2} \cdot T^{-1/2} (Z B Z^T) T^{-1/2} v & = BZT^{-1/2} \cdot \lambda v \\
+BZT^{-1} Z (B Z^T T^{-1/2} v) & = \lambda (B Z^T T^{-1/2} v)
+\end{align*}
+
+
+Thus, $\mathcal L(P)$ and $B Z^T T^{-1} Z$ share the same eigenvalues. Notice that this is similar to what we found in lecture, except for the $T^{-1}$. Remember that $T$ is diagonal, so this gives us
+
+$$
+B Z^T T^{-1} Z = B \times diag(\frac{  n_1}{ T_{11} }, \frac{n_2  }{ T_{22} }, \dots , \frac{  n_k}{ T_{kk} }).
+$$
+
+Now assume $n_k = \Theta(n)$ as $n$ increases. This restricts all blocks to grow at the same rate, $n$. Take $d_{min} = \min_i \sum_j p_{ij} = \min_i T_{ii}$. Then we have
+
+$$
+\lambda_* = \Theta(n \cdot \lambda_{min}(B) \cdot d_{min}).
+$$
+
+Where the $\min_i T_{ii}$ term comes from our additional diagonal terms. Then we can apply the Oliveira's concentraion of Laplacian matrices inequality (theorem 15) to say
+
+$$
+P [ \| \mathcal L(A) - \mathcal L(P) \| ] > 14 d_{min}^{-1/2} \sqrt{\log(4n / \eta)  }.
+$$
+
+Which implies
+
+$$
+P [ \| \mathcal L(A) - \mathcal L(P) \| ] = \sqrt{  \frac{ \log(n)}{  d_{min}}}.
+$$
+
+
+Suppose now that $B = \rho_n \widetilde B$ where $\widetilde B$ is fixed in $n$ with $\rho_n$ possible converging to 0 as $n\rightarrow \infty$. With $\widetilde B$ fixed, B depends on $n$ only through $\rho_n$. So we have the following with high probability. 
+
+$$
+\lambda_* = \Theta(n d^{-1}_{min} \rho_n) \text{ and } \| \mathcal L(A) - \mathcal L(P) \| = \Theta( \sqrt{ n d^{-1}_{min} \rho_n })
+$$
+
+Further, with high probability we have 
+
+$$
+\lambda_* > \| \mathcal L(A) - \mathcal L(P) \|.
+$$
+
+We can now bound our Davis-Kahan inequality with high probability.
+
+$$
+\min_{W \in \mathcal O(p)} \| \widehat U W - U \|_F \leq \frac{ \sqrt{2d} \| \mathcal L(A) - \mathcal L(P) \| }{  \lambda_* - \| \mathcal L(A) - \mathcal L(P) \|} = O\Big(\sqrt{  d \cdot d_{min}^{-1} } (n \rho_n)^{-1/2} \Big)
+$$
+
+Thus, there exists an orthogonal matrix $W_*$ such that, on average
+
+$$
+\| W_* \widehat U_i - U_i \| = O\Big(\sqrt{  d \cdot d_{min}^{-1} } (n \rho_n)^{-1/2} \Big).
+$$
+
+
+Note that clustering using $\widehat U$ is "equivalent" to clustering using $\widehat U W$ for any orthogonal $W$. 
+
+
+Let us now consider $U$, which contains $K$ distinct rows. Since the columns of $U$ are orthonormal, we have for all $i$ with $Z_i \neq Z_j$
+
+$$
+\| U_i - Uj \| = \Omega(n^{-1/2}).
+$$
+
+
+Let $S$ be the set of indices such that 
+
+$$
+\| W_* \widehat U_i - U_i \| > \min_{k: Z_k \neq Z_i}\| W_* \widehat U_i - U_k \|.
+$$
+
+
+Then $i \in S$ only if $\| W_* \widehat U_i - U_i \| = \Omega(n^{-1/2})$.
+
+
+We therefore have
+
+\begin{align}
+\min W \in \mathcal O(p) \| \widehat U W - U \|^2_F & \geq \sum_{i \in S} \| W_* \widehat U_i - U_i \|^2 \\
+  & \geq \sum_{i \in S} \Omega(n^{-1}) \\
+  & = |S| \times \Omega(n^{-1}).
+\end{align}
+
+Finally, we can use the bound the we derived previously to say
+
+$$
+\frac{  |S|}{ n } = O(d d^{-1}_{min} (n \rho)^{-1}) = o(1)
+$$
+
+provided that $n \rho \rightarrow \infty$ as $n \rightarrow \infty$.
