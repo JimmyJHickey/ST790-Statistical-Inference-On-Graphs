@@ -174,8 +174,6 @@ Further take $Z$ to be the $n \times K$ matrix such that $Z_{ik} = I( \tau(i) = 
 
 We can order our eigenvalues similar to as we did in the notes. Let $| \widehat \lambda_1 |  \geq |\widehat \lambda _2 | \geq \dots$ be the eigenvalues of $\mathcal L (A)$ in decreasing modulus. Similarly take $|\lambda_1| \geq |\lambda_2| \geq \dots$ to be the eigenvalues of $\mathcal L(P)$ in decreasing modulus. Here $\lambda_s(P) = 0$ for $s > d = \text{rank}( \mathcal L(P) )$. 
 
-Recall that $\mathcal L(P) = T^{-1/2} P T^{-1/2}$. Since $T$ is invertible, it must be full rank (and so must be $T^{-1/2}$). Thus, $\text{rank}( \mathcal L(P) ) = \text{rank}(P  ) = d$.
-
 Let us definte the sets $S_1 = \{ \widehat \lambda_j : j \geq d+1\}$ and $S_2 = \{\lambda_j : 1 \leq j \leq d \}$. Now we can apply Weyl's inequality to say
 
 $$
