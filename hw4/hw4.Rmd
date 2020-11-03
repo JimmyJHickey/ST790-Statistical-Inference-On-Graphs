@@ -1,0 +1,41 @@
+---
+title: "ST 790 Assignment 4"
+author: "David Elsheimer and Jimmy Hickey"
+date: "11/12/2020"
+output: pdf_document
+urlcolor: blue
+
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Instruction
+This assignment consists of $3$ problems. Choose $2$ out of the $3$ problems. The assignment is due on 
+**Friday, November 12** at 11:59pm EDT. Please submit your assignment electronically through the **Moodle** webpage.
+The assignment can be done as a group with at most 3 members per group (please include the name of the group members on the front page of the assignment).
+
+# Problem 1
+
+Skim the following [article](https://papers.nips.cc/paper/7482-overlapping-clustering-models-and-one-class-svm-to-bind-them-all.pdf). In particular take a look at Algorithm 1 in the referenced paper. Next download the **DBLP4** dataset from [here](https://www.cs.utexas.edu/~xmao/coauthorship.html). Now try to analyze this dataset using the Algorithm 1 (SVM-Cone) form the referenced paper (see also section 4.1.2 of the referenced paper). For the evaluation metric, use rank correlation (see section 4.1.2. of the referenced paper).
+
+**Note** This problem might be a tad tricky. It is perfectly fine if your results are not as good as that presented in the paper. As long as you are not getting a performance that is worse than chance, it should be fine.
+
+# Problem 2
+
+Skim the following [article](https://arxiv.org/pdf/1612.04717.pdf) (maybe only the first 16 pages, unless you really have time and care about the theory). Now take a look at section 4.1 on model selection for stochastic blockmodels. Next try to reproduce Table 1 (or a part of Table 1) but only for the ECV algorithm (Algorithm 3) with $L_2$ loss; you don't need to consider $L_2$ loss with stability. 
+
+# Problem 3
+Let $\mathbf{A}_1$ and $\mathbf{A}_2$ be two-blocks stochastic blockmodel graphs, with block probability matrices
+$$\mathbf{B}_1 = \begin{bmatrix} p_{11} & p_{12} \\ p_{12} & p_{22} \end{bmatrix},  \quad \mathbf{B}_2 = \begin{bmatrix} q_{11} & q_{12} \\ q_{12} & q_{22} \end{bmatrix}$$
+
+Suppose for simplicity that the first $n/2$ vertices of both $\mathbf{A}_1$ and $\mathbf{A}_2$ are assigned to block $1$ and that the last $n/2$ vertices of both $\mathbf{A}_1$ and $\mathbf{A}-2$ are assigned to block $2$. Assume that $\mathbf{A}_1(i,j)$ and $\mathbf{A}_2(k, \ell)$ are independent of one another if $\{i,j\} \not = \{k,\ell\}$. Finally, $\mathbf{A}_{1}(i,j)$ and $\mathbf{A}_2(i,j)$ are correlated with correlation $\rho \in [-1,1]$. We assume that $\rho$ is the same for all $\{i,j\}$ pairs.
+
++ Given $\mathbf{A}_1$ and $\mathbf{A}_2$, formulate a test statistic for testing $\mathbb{H}_0 : \rho = 0$ against the alternative hypothesis that $\mathbb{H}_1 \colon \rho \not = 0$. In other words, test the hypothesis that $\mathbf{A}_1$ is independent of $\mathbf{A}_2$. 
+
++ Do you think your test procedure is valid and consistent as $n \rightarrow \infty$ ? (assuming that the parameters of $\mathbf{B}_1$ and $\mathbf{B}_2$ and $\rho$ are kept constant). 
+
++ How would you adapt this procedure when the block assignments are unknown, or, in addition, if the
+graphs involved are degree corrected SBMs instead of the vanilla SBMs ?
