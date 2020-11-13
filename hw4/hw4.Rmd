@@ -138,6 +138,7 @@ Skim the following [article](https://arxiv.org/pdf/1612.04717.pdf) (maybe only t
 
 ```{r}
 library(randnet)
+library(irlba)
 
 # step 1 of alg 3
 # this will be looped for m = 1, ... , N
@@ -159,11 +160,13 @@ step1 = function(A, m, n, p, Kmax){
   train_pairs = rbinom(n*(n-1)/2, 1, p)
 
   
+  
   A_train = matrix(0, nrow = n, ncol = n)
   A_test = matrix(0, nrow = n, ncol = n)
   
-  A_train[upper.tri(A_train)] = train_pairs * A[upper.tri(A)]
-  
+  A_train[upper.tri(A_train, diag=FALSE)] = 
+    A[upper.tri(A,diag=FALSE)]*train_pairs
+
   # add lower triangular parts
   A_train = A_train +  t(A_train)
   
@@ -171,28 +174,148 @@ step1 = function(A, m, n, p, Kmax){
   # isSymmetric(A_train)
   
   # A_test is all indices not in A_train
-  A_test = abs(1-A_train)
-  
-  
+  A_test[upper.tri(A_test, diag=FALSE)] = 
+    A[upper.tri(A,diag=FALSE)]*(1 - train_pairs)
+  A_test = A_test + t(A_test)
+
   # sanity check
-  # all(A_train + A_test == 1)
+  # isSymmetric(A_test)
 
   
   ###
   # step b
   ###
   
+  L = matrix(0, ncol = 2, nrow = Kmax)
+
   for(k in 1:Kmax){
-    step1b()
+    L[k,] = step1b(k, n, p, A_train, A_test, train_pairs)
   }
+  
+  return(as.vector(L))
   
 }
 
 
 
 # step 1b of alg 3
-step1b = fuction(){
+# Thank you TK for helping us with this step!
+# We needed A LOT of help.
+step1b = function(k, n, p, A_train, A_test, train_pairs){
+  ###
+  # step 1b i
+  ###
   
+  # rank k constrained matrix completion
+  # estimate k values with rank constraint k
+  irlb_out = irlba(A_train/p, nu = k, nv = k)
+  Ahat_k = irlb_out$u %*% diag(irlb_out$d, nrow = k) %*% t(irlb_out$v)
+  
+  
+  ###
+  # step 1b ii
+  ###
+  
+  # spectral clustering on Ahat_k
+  
+  Xhat_k = irlba(Ahat_k, nu=k, nv=k)$u
+  
+  # if k = 1, then we have an SBM
+  # if k > 1, then we have a DCSBM
+  # as the algorithm says, we need to perform
+  # spectral and spherical clustering on them respectively
+  
+  if(k == 1){
+    # spectral clustering
+    X_norm = Xhat_k / outer(sqrt(rowSums(Xhat_k^2)),c(1))
+  } else{
+    # speherical clustering
+    X_norm = Xhat_k / outer( sqrt(rowSums(Xhat_k^2)),rep(1:k))
+  }
+  
+  # kmeans freaks out if you have NaNs in the data
+  X_norm[is.nan(X_norm)]=rep(0,k)
+
+  
+  # now do K-means
+  clust1 = kmeans(Xhat_k, centers = k , iter.max = 50)
+  clust2 = kmeans(X_norm, centers = k, iter.max = 50)
+  
+  chat1 = clust1$cluster
+  chat2 = clust2$cluster
+  
+  ###
+  # step 1 b iii
+  ###
+  
+  # estimate the model probability matrices
+  # follows from the paper, section 3.2
+  
+  # we will need a matrix of the clusters
+  clust_mat = diag(k)
+  
+  # need as.matrix for the case of k = 1
+  clust1_mat = as.matrix(clust_mat[chat1,], ncol = k)
+  clust2_mat = as.matrix(clust_mat[chat2,], ncol = k)
+  
+  # equation 6
+  # build nhat and Bhat
+  # also build Ohat since we are iterating over the same indices
+  nhat = matrix(0, ncol = k, nrow = k)
+  Ohat = matrix(0, ncol = k, nrow = k)
+  Bhat = matrix(0, ncol = k, nrow = k)
+  
+  for(i in 1:k){
+    for(j in 1:k){
+      
+      if(i == j){
+        # length of indicators
+        nhat[i,j] = (length(chat1[chat1 == i]) -1) * length(chat1[chat1==j])
+      } else{
+        nhat[i,j] = length(chat1[chat1 == i]) * length(chat1[chat1==j])
+      }
+      
+      Bhat[i,j] = sum(A_train * (clust1_mat[,i] %*% t(clust1_mat[,j])))/nhat[i,j]
+      Ohat[i,j] = sum(A_train * (clust1_mat[,i] %*% t(clust1_mat[,j])))
+    }
+  }
+  
+  # calculate theta_hat from eqn at top of page 10
+
+  if(k == 1){
+    # Ohat will be a vector, so don't need to sum over it
+    # have to make the O scalar a vector or R yells at me
+    theta2_hat = rowSums(A_train) / as.vector(Ohat)
+  }  else{
+    theta2_hat =rowSums(A_train) / rowSums(Ohat[chat2,])
+  }
+  
+  # calculate P from eqn at top of page 10
+  Phat_1 = clust1_mat %*% Bhat %*% t(clust1_mat)
+  Phat_2 = (theta2_hat %*% t(theta2_hat)) * Ohat[chat2, chat2] / p
+  
+  
+  
+  # now we can calculate loss!
+  # we need to find the estimates of the Phat matrices
+  # that correspond the to the test set
+  # this follows the same process as creating the original train/test
+  P1_test = matrix(0, nrow = n, ncol = n)
+  P2_test = matrix(0, nrow = n, ncol = n)
+
+  P1_test[upper.tri(P1_test, diag=FALSE)] = 
+    Phat_1[upper.tri(Phat_1,diag=FALSE)]*(1 - train_pairs)
+  P1_test = P1_test + t(P1_test)
+  
+  P2_test[upper.tri(P2_test, diag=FALSE)] = 
+    Phat_2[upper.tri(Phat_2,diag=FALSE)]*(1 - train_pairs)
+  P2_test = P2_test + t(P2_test)
+  
+  loss1 = sum((A_test - P1_test)^2)
+  loss2 = sum((A_test - P2_test)^2)
+
+
+  return(c(loss1, loss2))  
 }
 
 
@@ -212,16 +335,51 @@ alg3 = function(K, n, lambda, beta, Kmax=5, p=0.90, N=200){
   # input adjacency matrix
   A = graph$A
   
+  loss_mat = matrix(0, nrow = N, ncol = 2 * Kmax)
   
   ###
   # step 1
   ###
   for(m in 1:N){
-    step1()
+    loss_mat[m,] = step1(A, m, n, p, Kmax)
   }
   
   
+  ###
+  # step 2
+  ###
   
+  # qhat this gives the optimal model
+  # 1 is SBM and 2 is DCSBM
+  qhat = rep(0, N)
+
+  # khat gives the optimal number of communities
+  khat = rep(0, N)
+  
+  for(m in 1:N){
+    # find the index with the lowest and divide by Kmax
+    # this is because we have all of the SBM result at the front of the row
+    # and all of the DCSBM results at the end of the row
+    qhat[m] = ceiling(which.min(loss_mat[m,]) / Kmax)
+    
+    #  mod by Kmax to find which community number it is under
+    # since there are two columns representing each community number
+    # one column for SBM and one for DCSBM
+    # add one to Kmax so that a community number of KMax doesn't mod to 0
+    khat[m] = which.min(loss_mat[m,])%%(Kmax+1)
+    
+  }
+
+  
+  # loss is number of times DCSBM is chosen AND max communities are chosen
+  # divided by N
+  loss = sum( (qhat == 2) & (khat == K))/N
+  
+  return(list(K = K,
+              n = n,
+              lambda = lambda,
+              beta = beta,
+              loss = loss))
 }
 
 
@@ -229,6 +387,41 @@ alg3 = function(K, n, lambda, beta, Kmax=5, p=0.90, N=200){
 
 
 
+results = data.frame(matrix(vector(), 0, 5,
+                dimnames=list(c(), c("K", "n", "lambda", "beta", "L2 loss"))),
+                stringsAsFactors=F)
+
+
+results = rbind(results, alg3(3, 600, 15, 0.2, Kmax=5, p=0.90, N=200))
+results = rbind(results, alg3(3, 600, 20, 0.2, Kmax=5, p=0.90, N=200))
+results = rbind(results, alg3(3, 600, 30, 0.2, Kmax=5, p=0.90, N=200))
+results = rbind(results, alg3(3, 600, 40, 0.2, Kmax=5, p=0.90, N=200))
+
+results = rbind(results, alg3(5, 600, 15, 0.2, Kmax=5, p=0.90, N=200))
+results = rbind(results, alg3(5, 600, 20, 0.2, Kmax=5, p=0.90, N=200))
+results = rbind(results, alg3(5, 600, 30, 0.2, Kmax=5, p=0.90, N=200))
+results = rbind(results, alg3(5, 600, 40, 0.2, Kmax=5, p=0.90, N=200))
+
+results = rbind(results, alg3(5, 1200, 15, 0.2, Kmax=5, p=0.90, N=200))
+results = rbind(results, alg3(5, 1200, 20, 0.2, Kmax=5, p=0.90, N=200))
+results = rbind(results, alg3(5, 1200, 30, 0.2, Kmax=5, p=0.90, N=200))
+results = rbind(results, alg3(5, 1200, 40, 0.2, Kmax=5, p=0.90, N=200))
+
+results = rbind(results, alg3(3, 600, 40, 0.1, Kmax=5, p=0.90, N=200))
+results = rbind(results, alg3(3, 600, 40, 0.2, Kmax=5, p=0.90, N=200))
+results = rbind(results, alg3(3, 600, 40, 0.5, Kmax=5, p=0.90, N=200))
+
+results = rbind(results, alg3(5, 600, 40, 0.1, Kmax=5, p=0.90, N=200))
+results = rbind(results, alg3(5, 600, 40, 0.2, Kmax=5, p=0.90, N=200))
+results = rbind(results, alg3(5, 600, 40, 0.5, Kmax=5, p=0.90, N=200))
+
+results = rbind(results, alg3(5, 1200, 40, 0.1, Kmax=5, p=0.90, N=200))
+results = rbind(results, alg3(5, 1200, 40, 0.2, Kmax=5, p=0.90, N=200))
+results = rbind(results, alg3(5, 1200, 40, 0.5, Kmax=5, p=0.90, N=200))
+
+save(results, "q2_results.Rdata")
+
+"knitr::kable(results)
 
 ```
 
