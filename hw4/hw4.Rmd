@@ -133,6 +133,113 @@ Using the code above $\hat{\Theta}$ was generated using algorithm 1 and addition
 
 Skim the following [article](https://arxiv.org/pdf/1612.04717.pdf) (maybe only the first 16 pages, unless you really have time and care about the theory). Now take a look at section 4.1 on model selection for stochastic blockmodels. Next try to reproduce Table 1 (or a part of Table 1) but only for the ECV algorithm (Algorithm 3) with $L_2$ loss; you don't need to consider $L_2$ loss with stability. 
 
+
+
+
+```{r}
+library(randnet)
+
+# step 1 of alg 3
+# this will be looped for m = 1, ... , N
+step1 = function(A, m, n, p, Kmax){
+  
+  ####
+  # step a
+  ###
+  
+  # split into train and test with probability p
+  # We only want to choose from the upper (or lower) triangular
+  # vertices, since we will be adding the lower (or upper) triangular part
+  # i.e. if node pair (i,j) is selected, then (j,i) will be added after
+  
+  # list of pairs in the upper triangular portion of the training set
+  # we are looking at n*(n-1)/2 vertices because we are not considering
+  # the diagonal
+  
+  train_pairs = rbinom(n*(n-1)/2, 1, p)
+
+  
+  A_train = matrix(0, nrow = n, ncol = n)
+  A_test = matrix(0, nrow = n, ncol = n)
+  
+  A_train[upper.tri(A_train)] = train_pairs * A[upper.tri(A)]
+  
+  # add lower triangular parts
+  A_train = A_train +  t(A_train)
+  
+  # sanity check
+  # isSymmetric(A_train)
+  
+  # A_test is all indices not in A_train
+  A_test = abs(1-A_train)
+  
+  
+  # sanity check
+  # all(A_train + A_test == 1)
+
+  
+  ###
+  # step b
+  ###
+  
+  for(k in 1:Kmax){
+    step1b()
+  }
+  
+}
+
+
+
+# step 1b of alg 3
+step1b = fuction(){
+  
+}
+
+
+# alg 3 from Li, Levina, Zhu
+# in order to make table 1, it should return
+# K, n, lambda, beta, L2 looss
+alg3 = function(K, n, lambda, beta, Kmax=5, p=0.90, N=200){
+
+  # need to generate graph each time with new parameters
+  graph = BlockModel.Gen(lambda=lambda, 
+                         n=n, 
+                         K=K, 
+                         beta=beta, 
+                         rho=p )
+
+  
+  # input adjacency matrix
+  A = graph$A
+  
+  
+  ###
+  # step 1
+  ###
+  for(m in 1:N){
+    step1()
+  }
+  
+  
+  
+}
+
+
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
 # Problem 3
 Let $\mathbf{A}_1$ and $\mathbf{A}_2$ be two-blocks stochastic blockmodel graphs, with block probability matrices
 $$\mathbf{B}_1 = \begin{bmatrix} p_{11} & p_{12} \\ p_{12} & p_{22} \end{bmatrix},  \quad \mathbf{B}_2 = \begin{bmatrix} q_{11} & q_{12} \\ q_{12} & q_{22} \end{bmatrix}$$
