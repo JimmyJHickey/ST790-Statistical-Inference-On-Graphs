@@ -238,8 +238,8 @@ step1b = function(k, n, p, A_train, A_test, train_pairs){
 
   
   # now do K-means
-  clust1 = kmeans(Xhat_k, centers = k , iter.max = 50)
-  clust2 = kmeans(X_norm, centers = k, iter.max = 50)
+  clust1 = kmeans(Xhat_k, centers = k , iter.max = 100)
+  clust2 = kmeans(X_norm, centers = k, iter.max = 100)
   
   chat1 = clust1$cluster
   chat2 = clust2$cluster
@@ -392,36 +392,41 @@ results = data.frame(matrix(vector(), 0, 5,
                 stringsAsFactors=F)
 
 
-results = rbind(results, alg3(3, 600, 15, 0.2, Kmax=5, p=0.90, N=200))
-results = rbind(results, alg3(3, 600, 20, 0.2, Kmax=5, p=0.90, N=200))
-results = rbind(results, alg3(3, 600, 30, 0.2, Kmax=5, p=0.90, N=200))
-results = rbind(results, alg3(3, 600, 40, 0.2, Kmax=5, p=0.90, N=200))
+# results = rbind(results, alg3(3, 600, 15, 0.2, Kmax=6, p=0.90, N=200))
+# results = rbind(results, alg3(3, 600, 20, 0.2, Kmax=6, p=0.90, N=200))
+# results = rbind(results, alg3(3, 600, 30, 0.2, Kmax=6, p=0.90, N=200))
+# results = rbind(results, alg3(3, 600, 40, 0.2, Kmax=6, p=0.90, N=200))
+# 
+# results = rbind(results, alg3(5, 600, 15, 0.2, Kmax=6, p=0.90, N=200))
+# results = rbind(results, alg3(5, 600, 20, 0.2, Kmax=6, p=0.90, N=200))
+# results = rbind(results, alg3(5, 600, 30, 0.2, Kmax=6, p=0.90, N=200))
+# results = rbind(results, alg3(5, 600, 40, 0.2, Kmax=6, p=0.90, N=200))
+# 
+# results = rbind(results, alg3(5, 1200, 15, 0.2, Kmax=6, p=0.90, N=200))
+# results = rbind(results, alg3(5, 1200, 20, 0.2, Kmax=6, p=0.90, N=200))
+# results = rbind(results, alg3(5, 1200, 30, 0.2, Kmax=6, p=0.90, N=200))
+# results = rbind(results, alg3(5, 1200, 40, 0.2, Kmax=6, p=0.90, N=200))
+# 
+# 
+# 
+# results = rbind(results, alg3(3, 600, 40, 0.1, Kmax=5, p=0.90, N=200))
+# results = rbind(results, alg3(3, 600, 40, 0.2, Kmax=5, p=0.90, N=200))
+# results = rbind(results, alg3(3, 600, 40, 0.5, Kmax=5, p=0.90, N=200))
+# 
+# results = rbind(results, alg3(5, 600, 40, 0.1, Kmax=5, p=0.90, N=200))
+# results = rbind(results, alg3(5, 600, 40, 0.2, Kmax=5, p=0.90, N=200))
+# results = rbind(results, alg3(5, 600, 40, 0.5, Kmax=5, p=0.90, N=200))
+# 
+# results = rbind(results, alg3(5, 1200, 40, 0.1, Kmax=5, p=0.90, N=200))
+# results = rbind(results, alg3(5, 1200, 40, 0.2, Kmax=5, p=0.90, N=200))
+# last = rbind(results, alg3(5, 1200, 40, 0.5, Kmax=5, p=0.90, N=200))
 
-results = rbind(results, alg3(5, 600, 15, 0.2, Kmax=5, p=0.90, N=200))
-results = rbind(results, alg3(5, 600, 20, 0.2, Kmax=5, p=0.90, N=200))
-results = rbind(results, alg3(5, 600, 30, 0.2, Kmax=5, p=0.90, N=200))
-results = rbind(results, alg3(5, 600, 40, 0.2, Kmax=5, p=0.90, N=200))
 
-results = rbind(results, alg3(5, 1200, 15, 0.2, Kmax=5, p=0.90, N=200))
-results = rbind(results, alg3(5, 1200, 20, 0.2, Kmax=5, p=0.90, N=200))
-results = rbind(results, alg3(5, 1200, 30, 0.2, Kmax=5, p=0.90, N=200))
-results = rbind(results, alg3(5, 1200, 40, 0.2, Kmax=5, p=0.90, N=200))
+load("q2_fullresults.Rdata")
 
-results = rbind(results, alg3(3, 600, 40, 0.1, Kmax=5, p=0.90, N=200))
-results = rbind(results, alg3(3, 600, 40, 0.2, Kmax=5, p=0.90, N=200))
-results = rbind(results, alg3(3, 600, 40, 0.5, Kmax=5, p=0.90, N=200))
 
-results = rbind(results, alg3(5, 600, 40, 0.1, Kmax=5, p=0.90, N=200))
-results = rbind(results, alg3(5, 600, 40, 0.2, Kmax=5, p=0.90, N=200))
-results = rbind(results, alg3(5, 600, 40, 0.5, Kmax=5, p=0.90, N=200))
 
-results = rbind(results, alg3(5, 1200, 40, 0.1, Kmax=5, p=0.90, N=200))
-results = rbind(results, alg3(5, 1200, 40, 0.2, Kmax=5, p=0.90, N=200))
-results = rbind(results, alg3(5, 1200, 40, 0.5, Kmax=5, p=0.90, N=200))
-
-save(results, "q2_results.Rdata")
-
-"knitr::kable(results)
+knitr::kable(full_results[-1])
 
 ```
 
